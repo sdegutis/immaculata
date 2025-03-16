@@ -7,6 +7,7 @@ export class Module {
   #exports: object | undefined;
 
   source;
+  imports: Set<string> | undefined;
 
   constructor(
     private content: string,
@@ -38,6 +39,7 @@ export class Module {
 
       // this.content = sourceCode + sourceMap;
       this.content = sourceCode;
+      this.imports = transformed.imports;
 
       const fn = new Function('require', 'exports', this.content);
 

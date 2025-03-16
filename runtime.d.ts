@@ -17,6 +17,7 @@ type FsFile = {
 type FsModule = {
   require(): any;
   source: string;
+  imports: Set<string> | undefined;
 };
 
 declare module '*/' {
