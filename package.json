@@ -1,9 +1,9 @@
 {
-  "name": "@imlib/core",
-  "version": "3.5.1",
+  "name": "immaculata",
+  "version": "0.0.1",
   "main": "out/index.js",
   "bin": {
-    "imlib": "out/cli.js"
+    "immaculata": "out/cli.js"
   },
   "scripts": {
     "build": "tsc --build",
@@ -11,16 +11,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/thesoftwarephilosopher/imlib.git"
+    "url": "git+https://github.com/sdegutis/immaculata.git"
   },
   "keywords": [],
   "author": "Steven Degutis",
   "license": "Catholic-MIT",
   "description": "Simple TypeScript/JSX SSG",
   "bugs": {
-    "url": "https://github.com/thesoftwarephilosopher/imlib/issues"
+    "url": "https://github.com/sdegutis/immaculata/issues"
   },
-  "homepage": "https://github.com/thesoftwarephilosopher/imlib#readme",
+  "homepage": "https://github.com/sdegutis/immaculata#readme",
   "dependencies": {
     "@babel/core": "^7.25.2",
     "@babel/plugin-syntax-import-attributes": "^7.25.6",
