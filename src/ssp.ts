@@ -1,37 +1,37 @@
 export type SiteProcessor = (data: {
   inFiles: ReturnType<Map<string, FsFile>['values']>,
   outFiles: Map<string, Buffer | string>,
-}) => void;
+}) => void
 
 export const processSite: SiteProcessor = ({ inFiles, outFiles }) => {
   for (const file of inFiles) {
     for (const { path, content } of processFile(file)) {
-      outFiles.set(path, content);
+      outFiles.set(path, content)
     }
   }
-};
+}
 
-const isArrayFile = /\/.*(?<slug>\[.+\]).*\..+\.js$/;
-const isSingleFile = /\..+\.js$/;
+const isArrayFile = /\/.*(?<slug>\[.+\]).*\..+\.js$/
+const isSingleFile = /\..+\.js$/
 
 export function processFile(file: FsFile): { path: string, content: string | Buffer }[] {
-  const out = [];
+  const out = []
 
-  let match;
+  let match
   if (match = file.path.match(isArrayFile)) {
-    const exportedArray = file.module!.require().default as [string, any][];
+    const exportedArray = file.module!.require().default as [string, any][]
     for (const [name, content] of exportedArray) {
-      const filepath = file.path.replace(match.groups!["slug"]!, name);
-      out.push({ path: filepath.slice(0, -3), content });
+      const filepath = file.path.replace(match.groups!["slug"]!, name)
+      out.push({ path: filepath.slice(0, -3), content })
     }
   }
   else if (file.path.match(isSingleFile)) {
-    const exportedContent = file.module!.require().default;
-    out.push({ path: file.path.slice(0, -3), content: exportedContent });
+    const exportedContent = file.module!.require().default
+    out.push({ path: file.path.slice(0, -3), content: exportedContent })
   }
   else {
-    out.push({ path: file.path, content: file.content });
+    out.push({ path: file.path, content: file.content })
   }
 
-  return out;
+  return out
 }

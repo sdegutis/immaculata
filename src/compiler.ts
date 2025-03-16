@@ -1,13 +1,13 @@
-import * as babel from '@babel/core';
-import { readFileSync } from 'fs';
-import { babelPluginVanillaJSX } from './vanillajsx.js';
+import * as babel from '@babel/core'
+import { readFileSync } from 'fs'
+import { babelPluginVanillaJSX } from './vanillajsx.js'
 
 export class Compiler {
 
   packageJson = JSON.parse(readFileSync('package.json').toString('utf8'));
 
   compile(code: string, realFilePath?: string, browserFilePath?: string) {
-    const imports = new Set<string>();
+    const imports = new Set<string>()
     return {
       code: babel.transformSync(code, {
         filename: realFilePath ?? browserFilePath,
@@ -20,7 +20,7 @@ export class Compiler {
         ],
       })!.code!,
       imports,
-    };
+    }
   }
 
 }

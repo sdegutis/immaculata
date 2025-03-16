@@ -1,81 +1,81 @@
-const UNARY = new Set(["img", "br", "hr", "input", "meta", "link"]);
+const UNARY = new Set(["img", "br", "hr", "input", "meta", "link"])
 
-const jsx = Symbol.for('jsx');
+const jsx = Symbol.for('jsx')
 
 export function jsxToString(object: any): string {
-  const parts: string[] = [];
-  push(object, parts);
-  return parts.join('');
+  const parts: string[] = []
+  push(object, parts)
+  return parts.join('')
 }
 
 function push(object: any, parts: string[]): void {
   if (typeof object === 'string') {
-    parts.push(object);
-    return;
+    parts.push(object)
+    return
   }
 
   if (typeof object === 'undefined' || typeof object === 'boolean' || object === null) {
-    return;
+    return
   }
 
   if (typeof object !== 'object') {
-    parts.push(String(object));
-    return;
+    parts.push(String(object))
+    return
   }
 
   if (object instanceof Array) {
     for (const child of object) {
-      push(child, parts);
+      push(child, parts)
     }
-    return;
+    return
   }
 
   if (!(jsx in object)) {
-    parts.push(String(object));
-    return;
+    parts.push(String(object))
+    return
   }
 
-  const tag = object[jsx];
-  delete object[jsx];
+  const tag = object[jsx]
+  delete object[jsx]
 
   if (typeof tag === 'function') {
-    return push(tag(object), parts);
+    return push(tag(object), parts)
   }
 
-  const children = object.children;
-  delete object.children;
+  const children = object.children
+  delete object.children
 
   if (tag === '') {
     if (children instanceof Array) {
       for (const child of children) {
-        push(child, parts);
+        push(child, parts)
       }
     }
     else {
-      push(children, parts);
+      push(children, parts)
     }
-    return;
+    return
   }
 
-  parts.push('<', tag);
+  parts.push('<', tag)
   for (const k in object) {
-    const v = object[k];
+    const v = object[k]
     if (v === true)
-      parts.push(' ', k);
+      parts.push(' ', k)
     else if (v)
-      parts.push(' ', k, '="', v, '"');
+      parts.push(' ', k, '="', v, '"')
   }
-  parts.push('>');
+  parts.push('>')
 
   if (!UNARY.has(tag)) {
     if (children instanceof Array) {
       for (const child of children) {
-        push(child, parts);
+        push(child, parts)
       }
     }
     else {
-      push(children, parts);
+      push(children, parts)
     }
-    parts.push('</', tag, '>');
+    parts.push('</', tag, '>')
   }
 }
