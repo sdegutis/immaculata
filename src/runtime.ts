@@ -46,6 +46,7 @@ export class Runtime {
     const filepaths = paths.map(p => p.slice(this.siteDir.length));
 
     for (const filepath of filepaths) {
+      if (filepath.endsWith('.d.ts')) continue
       if (fs.existsSync(this.realPathFor(filepath))) {
         this.#createFile(filepath);
       }
