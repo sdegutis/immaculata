@@ -208,7 +208,7 @@ jobs:
 
 ## Special thanks
 
-St. Joseph helped with his [expectedly high engineering ability](https://www.lorettochapel.com/staircase).
+The engineering ability of [St. Joseph the Worker](https://www.lorettochapel.com/staircase) was borrowed.
 
 This was sponsored by the [Immaculate Conception](https://en.wikipedia.org/wiki/Bernadette_Soubirous), the Queen of Heaven.
 
