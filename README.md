@@ -26,7 +26,7 @@ This way you can write all your front-end in TypeScript, and pretend you didn't.
 
 ### Dynamic files
 
-Sometimes we need to include build-time data into a file. For example, a timestamp, or the contents of anothr file.
+Sometimes we need to include build-time data into a file. For example, a timestamp, or the contents of another file.
 
 If a file ends with `.<ext>.ts`, it's run as a module, and its default export becomes the contents.
 
