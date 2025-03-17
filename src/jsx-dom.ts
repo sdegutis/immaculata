@@ -2,7 +2,7 @@ export const jsx = (tag: string | Function, fullAttrs: Record<string, any>) => {
   const { children, ...attrs } = fullAttrs
 
   if (typeof tag === 'function') {
-    return tag(attrs ?? {}, children)
+    return tag({ ...attrs, children })
   }
 
   if (tag === '') {

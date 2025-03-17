@@ -5,7 +5,7 @@ export const jsx = (tag: string | Function, { children, ...attrs }: Record<strin
   if (!Array.isArray(children)) children = [children]
 
   if (typeof tag === 'function') {
-    return tag(attrs ?? {}, children)
+    return tag({ ...attrs, children })
   }
 
   const parts: string[] = []
