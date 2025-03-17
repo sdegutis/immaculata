@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sdegutis/immaculata.git"
+    "url": "git+https://github.com/sdegutis/immaculata.dev.git"
   },
   "keywords": [],
   "author": "Steven Degutis",
   "description": "Simple TypeScript/JSX SSG",
   "bugs": {
-    "url": "https://github.com/sdegutis/immaculata/issues"
+    "url": "https://github.com/sdegutis/immaculata.dev/issues"
   },
-  "homepage": "https://github.com/sdegutis/immaculata#readme",
+  "homepage": "https://github.com/sdegutis/immaculata.dev#readme",
   "dependencies": {
     "@babel/core": "^7.25.2",
     "@babel/plugin-syntax-import-attributes": "^7.25.6",
