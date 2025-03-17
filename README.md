@@ -124,6 +124,14 @@ To make this work in VS Code, add this line to `.vscode/settings.json`:
   "typescript.preferences.importModuleSpecifierEnding": "js",
 ```
 
+### Getting JSX to work
+
+To fix importing `.tsx` as `.js` in VS Code, add this line to `tsconfig.json`:
+
+```jsonc
+  "jsx": "react-native",
+```
+
 ### Getting Import Dirs to work
 
 In `tsconfig.json`, add:
@@ -133,14 +141,6 @@ In `tsconfig.json`, add:
       "node", // only include if needed
       "immaculata/runtime.d.ts"
     ],
-```
-
-### Getting JSX to work
-
-To fix importing `.tsx` as `.js` in VS Code, add this line to `tsconfig.json`:
-
-```jsonc
-  "jsx": "react-native",
 ```
 
 ### Publishing to GitHub Pages
