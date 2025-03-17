@@ -138,7 +138,6 @@ In `tsconfig.json`, add:
 To fix importing `.tsx` as `.js` in VS Code, add this line to `tsconfig.json`:
 
 ```jsonc
-```
   "jsx": "react-native",
 ```
 
