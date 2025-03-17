@@ -31,7 +31,7 @@ export function startDevServer(runtime: Runtime, config?: { port?: number }) {
         server.files = outfiles
 
         updatedPaths.clear()
-        server.rebuilt()
+        server.events.dispatchEvent(new Event('rebuilt'))
       }
       catch (e) {
         console.error(e)
@@ -55,11 +55,32 @@ class Server {
   files: Map<string, Buffer | string> | undefined
   handlers?: Map<string, (body: string) => string> | undefined
 
-  rebuilt = () => { };
+  events = new EventTarget();
+
+  #reloadables = new Set<http.ServerResponse>()
 
   startServer(port: number) {
+    this.events.addEventListener('rebuilt', () => {
+      for (const client of this.#reloadables) {
+        console.log('Notifying SSE connection')
+        client.write('data: {}\n\n')
+      }
+    })
+
     const server = http.createServer((req, res) => {
       const url = req.url!.split('?')[0]!
+
+      if (url === '/@imlib/hmr') {
+        res.once('close', () => {
+          this.#reloadables.delete(res)
+        })
+        res.setHeader('connection', 'keep-alive')
+        res.setHeader('content-type', 'text/event-stream')
+        res.setHeader('cache-control', 'no-cache')
+        res.flushHeaders()
+        this.#reloadables.add(res)
+        return
+      }
 
       if (req.method === 'POST') {
         const handler = this.handlers?.get(url)
@@ -70,11 +91,11 @@ class Server {
           })
           req.on('end', () => {
             let redirect: string
-            this.rebuilt = () => {
+            this.events.addEventListener('rebuilt', () => {
               res.statusCode = 302
               res.setHeader('Location', redirect)
               res.end()
-            }
+            }, { once: true })
             const body = Buffer.concat(data).toString('utf8')
             redirect = handler(body)
           })
