@@ -96,7 +96,9 @@ npm i immaculata
 
 ### Running locally
 
-You could just run `immaculata dev`, or do it with VS Code's launcher:
+Put some files in `<projectroot>/site`, like HTML, JS, or CSS files. Or even `.ts` or `.tsx` files.
+
+Then run `immaculata dev`. Or do it with VS Code's launcher:
 
 ```json
 {
