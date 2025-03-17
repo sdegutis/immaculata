@@ -1,6 +1,6 @@
 type FsFile = {
   path: string
-  content: Buffer | string
+  content: Uint8Array | string
   module?: FsModule
 }
 

@@ -1,6 +1,6 @@
 export type SiteProcessor = (data: {
   inFiles: ReturnType<Map<string, FsFile>['values']>,
-  outFiles: Map<string, Buffer | string>,
+  outFiles: Map<string, Uint8Array | string>,
 }) => void
 
 export const processSite: SiteProcessor = ({ inFiles, outFiles }) => {

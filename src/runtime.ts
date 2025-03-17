@@ -16,14 +16,14 @@ export class Runtime {
 
   siteDir
   #processor
-  #jsxContentSsg: Buffer
-  #jsxContentBrowser: Buffer
+  #jsxContentSsg: Uint8Array
+  #jsxContentBrowser: Uint8Array
 
   constructor(config?: {
     siteDir: string,
     processor: SiteProcessor,
-    jsxContentSsg?: Buffer,
-    jsxContentBrowser?: Buffer,
+    jsxContentSsg?: Uint8Array,
+    jsxContentBrowser?: Uint8Array,
   }
   ) {
     this.siteDir = config?.siteDir ?? 'site'
@@ -43,7 +43,7 @@ export class Runtime {
     )
 
     const start = Date.now()
-    const outFiles = new Map<string, Buffer | string>()
+    const outFiles = new Map<string, Uint8Array | string>()
     processor({ inFiles: this.files.values(), outFiles })
     console.log(`Time: ${Date.now() - start} ms`)
     return outFiles
@@ -103,12 +103,12 @@ export class Runtime {
     this.#putFile(filepath, fs.readFileSync(this.realPathFor(filepath)))
   }
 
-  #putFile(filepath: string, content: Buffer) {
+  #putFile(filepath: string, content: Uint8Array) {
     const file = new File(filepath, content, this)
     this.files.set(file.path, file)
   }
 
-  #shimIfNeeded(filepath: string, content: Buffer) {
+  #shimIfNeeded(filepath: string, content: Uint8Array) {
     if (!this.files.has(convertTsExts(filepath))) {
       this.#putFile(filepath, content)
     }

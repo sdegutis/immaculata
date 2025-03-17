@@ -52,7 +52,7 @@ export function startDevServer(runtime: Runtime, config?: { port?: number }) {
 
 class Server {
 
-  files: Map<string, Buffer | string> | undefined
+  files: Map<string, Uint8Array | string> | undefined
   handlers?: Map<string, (body: string) => string> | undefined
 
   events = new EventTarget();
@@ -85,7 +85,7 @@ class Server {
       if (req.method === 'POST') {
         const handler = this.handlers?.get(url)
         if (handler) {
-          const data: Buffer[] = []
+          const data: Uint8Array[] = []
           req.on('data', (chunk) => {
             data.push(chunk)
           })
