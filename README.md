@@ -54,7 +54,7 @@ In the future, maybe we should have it return a Map or an Object, so that we can
 
 ### Site processing
 
-Sometimes you want to automatically append a copyright or timestamp to the end of every HTML file.
+Sometimes you want to automatically append a copyright to the top of every JS file, or timestamp at the bottom of each HTML file.
 
 Or maybe you want to generate a sitemap based on all files.
 
