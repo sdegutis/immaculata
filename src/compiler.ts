@@ -1,6 +1,5 @@
 import * as babel from '@babel/core'
 import { readFileSync } from 'fs'
-import { babelPluginVanillaJSX } from './vanillajsx.js'
 
 export class Compiler {
 
@@ -15,8 +14,8 @@ export class Compiler {
           ...(realFilePath ? [require('@babel/plugin-transform-modules-commonjs')] : []),
           [require('@babel/plugin-transform-typescript'), { isTSX: true }],
           [require('@babel/plugin-syntax-import-attributes')],
-          babelPluginVanillaJSX,
-          collectImports(imports),
+          [require('@babel/plugin-transform-react-jsx'), { runtime: 'automatic', importSource: '/@imlib', throwIfNamespace: false }],
+          collectImports(!!browserFilePath, imports),
         ],
       })!.code!,
       imports,
@@ -25,13 +24,19 @@ export class Compiler {
 
 }
 
-function collectImports(imports: Set<string>): babel.PluginItem {
+function collectImports(inBrowser: boolean, imports: Set<string>): babel.PluginItem {
   return {
     visitor: {
       ImportDeclaration: {
         enter: (path) => {
-          if (path.node.source?.value) {
-            imports.add(path.node.source.value)
+          const dep = path.node.source?.value
+          if (!dep) return
+
+          if (dep === '/@imlib/jsx-runtime') {
+            path.node.source.value = (inBrowser ? '/@imlib/jsx-browser.js' : '/@imlib/jsx-node.js')
+          }
+          else {
+            imports.add(dep)
           }
         },
       }

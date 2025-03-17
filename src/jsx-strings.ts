@@ -1,65 +1,23 @@
 const UNARY = new Set(["img", "br", "hr", "input", "meta", "link"])
 
-const jsx = Symbol.for('jsx')
-
-export function jsxToString(object: any): string {
-  const parts: string[] = []
-  push(object, parts)
-  return parts.join('')
-}
-
-function push(object: any, parts: string[]): void {
-  if (typeof object === 'string') {
-    parts.push(object)
-    return
-  }
-
-  if (typeof object === 'undefined' || typeof object === 'boolean' || object === null) {
-    return
-  }
-
-  if (typeof object !== 'object') {
-    parts.push(String(object))
-    return
-  }
-
-  if (object instanceof Array) {
-    for (const child of object) {
-      push(child, parts)
-    }
-    return
-  }
-
-  if (!(jsx in object)) {
-    parts.push(String(object))
-    return
-  }
-
-  const tag = object[jsx]
-  delete object[jsx]
+export const jsx = (tag: string | Function, { children, ...attrs }: Record<string, any>) => {
+  if (children === null || children === undefined) children = []
+  if (!Array.isArray(children)) children = [children]
 
   if (typeof tag === 'function') {
-    return push(tag(object), parts)
+    return tag(attrs ?? {}, children)
   }
 
-  const children = object.children
-  delete object.children
+  const parts: string[] = []
 
   if (tag === '') {
-    if (children instanceof Array) {
-      for (const child of children) {
-        push(child, parts)
-      }
-    }
-    else {
-      push(children, parts)
-    }
-    return
+    pushChildren(children, parts)
+    return parts.join('')
   }
 
   parts.push('<', tag)
-  for (const k in object) {
-    const v = object[k]
+  for (const k in attrs) {
+    const v = attrs[k]
     if (v === true)
       parts.push(' ', k)
     else if (v)
@@ -68,14 +26,25 @@ function push(object: any, parts: string[]): void {
   parts.push('>')
 
   if (!UNARY.has(tag)) {
-    if (children instanceof Array) {
-      for (const child of children) {
-        push(child, parts)
+    pushChildren(children, parts)
+    parts.push('</', tag, '>')
+  }
+
+  return parts.join('')
+}
+
+export const jsxs = jsx
+export const Fragment = ''
+
+function pushChildren(children: any[], parts: string[]) {
+  for (const child of children) {
+    if (child !== null && child !== undefined && child !== false) {
+      if (Array.isArray(child)) {
+        pushChildren(child, parts)
+      }
+      else {
+        parts.push(child)
       }
     }
-    else {
-      push(children, parts)
-    }
-    parts.push('</', tag, '>')
   }
 }

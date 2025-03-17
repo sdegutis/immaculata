@@ -4,6 +4,9 @@ import { Compiler } from "./compiler.js"
 import { convertTsExts, File } from "./file.js"
 import { processSite, SiteProcessor } from "./ssp.js"
 
+const jsxDom = fs.readFileSync(__dirname + '/../src/jsx-dom.ts')
+const jsxStrings = fs.readFileSync(__dirname + '/../src/jsx-strings.ts')
+
 export class Runtime {
 
   files = new Map<string, File>();
@@ -11,17 +14,32 @@ export class Runtime {
   handlers = new Map<string, (body: string) => string>();
   compiler = new Compiler();
 
-  constructor(
-    public siteDir: string = 'site',
-    private processor: SiteProcessor = processSite,
+  siteDir
+  #processor
+  #jsxContentSsg: Buffer
+  #jsxContentBrowser: Buffer
+
+  constructor(config?: {
+    siteDir: string,
+    processor: SiteProcessor,
+    jsxContentSsg?: Buffer,
+    jsxContentBrowser?: Buffer,
+  }
   ) {
+    this.siteDir = config?.siteDir ?? 'site'
     this.rebuildAll()
+    this.#processor = config?.processor ?? processSite
+    this.#jsxContentSsg = config?.jsxContentSsg ?? jsxStrings
+    this.#jsxContentBrowser = config?.jsxContentBrowser ?? jsxDom
   }
 
   build() {
+    this.#shimIfNeeded('/@imlib/jsx-browser.ts', this.#jsxContentBrowser)
+    this.#shimIfNeeded('/@imlib/jsx-node.ts', this.#jsxContentSsg)
+
     const processor: SiteProcessor = (
       this.files.get('/@imlib/processor.js')?.module?.require().default ??
-      this.processor
+      this.#processor
     )
 
     const start = Date.now()
@@ -88,6 +106,12 @@ export class Runtime {
   #putFile(filepath: string, content: Buffer) {
     const file = new File(filepath, content, this)
     this.files.set(file.path, file)
+  }
+
+  #shimIfNeeded(filepath: string, content: Buffer) {
+    if (!this.files.has(convertTsExts(filepath))) {
+      this.#putFile(filepath, content)
+    }
   }
 
   realPathFor(filepath: string) {
