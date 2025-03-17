@@ -36,7 +36,7 @@ For example, `index.html.ts` becomes `index.html` and the default export is the 
 
 Say you have a list of blog posts as markdown files. It would be handy to generate a ToC on the home page.
 
-You can `import myfiles from './some/dir/` and you get an array of file objects like `{ path: string, content: string | UInt8Array }`.
+You can `import myfiles from './some/dir/'` and you get `{ path: string, content: string | UInt8Array }[]`.
 
 Notice the `/` at the end of the import. That's what causes this to be a dir import.
 
