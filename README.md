@@ -118,7 +118,7 @@ You'll need to import everything as `.js` whether it was implemented as `.ts` or
 
 To make this work in VS Code, add this line to `.vscode/settings.json`:
 
-```json
+```jsonc
   "typescript.preferences.importModuleSpecifierEnding": "js",
 ```
 
@@ -126,7 +126,7 @@ To make this work in VS Code, add this line to `.vscode/settings.json`:
 
 In `tsconfig.json`, add:
 
-```json
+```jsonc
     "types": [
       "node", // only include if needed
       "immaculata/runtime.d.ts"
@@ -137,6 +137,7 @@ In `tsconfig.json`, add:
 
 To fix importing `.tsx` as `.js` in VS Code, add this line to `tsconfig.json`:
 
+```jsonc
 ```
   "jsx": "react-native",
 ```
