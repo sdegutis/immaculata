@@ -14,7 +14,7 @@ export const processSite: SiteProcessor = ({ inFiles, outFiles }) => {
 const isArrayFile = /\/.*(?<slug>\[.+\]).*\..+\.js$/
 const isSingleFile = /\..+\.js$/
 
-export function processFile(file: FsFile): { path: string, content: string | Buffer }[] {
+export function processFile(file: FsFile): { path: string, content: string | Uint8Array }[] {
   const out = []
 
   let match
