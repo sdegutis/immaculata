@@ -126,7 +126,21 @@ class Server {
     })
 
     server.listen(port)
-    console.log(`Running on http://localhost:${port}`)
+
+    server.on('error', (e: Error & { code: string }) => {
+      if (e.code === 'EADDRINUSE') {
+        console.log(`Port ${port} in use, trying ${port + 1}`)
+        server.once('close', () => {
+          port++
+          server.listen(port)
+        })
+        server.close()
+      }
+    })
+
+    server.on('listening', () => {
+      console.log(`Running on http://localhost:${port}`)
+    })
   }
 
 }
