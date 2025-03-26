@@ -34,11 +34,12 @@ export class Runtime {
   }
 
   build() {
-    this.#shimIfNeeded('/@imlib/jsx-browser.ts', this.#jsxContentBrowser)
-    this.#shimIfNeeded('/@imlib/jsx-node.ts', this.#jsxContentSsg)
+    this.#shimIfNeeded(this.compiler.jsxPathBrowser, this.#jsxContentBrowser)
+    this.#shimIfNeeded(this.compiler.jsxPathNode, this.#jsxContentSsg)
 
+    const userConfig: Record<string, any> = this.files.get('/@imlib/processor.js')?.module?.require()
     const processor: SiteProcessor = (
-      this.files.get('/@imlib/processor.js')?.module?.require().default ??
+      userConfig["default"] ??
       this.#processor
     )
 
