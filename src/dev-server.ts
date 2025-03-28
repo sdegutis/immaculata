@@ -20,6 +20,7 @@ export function startDevServer(runtime: Runtime, config?: { port?: number }) {
 
   const pathUpdated = (filePath: string) => {
     updatedPaths.add(filePath.split(path.sep).join(path.posix.sep))
+    console.log('Updated:', ...updatedPaths)
     clearTimeout(reloadFsTimer)
     reloadFsTimer = setTimeout(() => {
       console.log('Rebuilding site...')
