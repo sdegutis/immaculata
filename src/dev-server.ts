@@ -48,6 +48,12 @@ export function startDevServer(runtime: Runtime, config?: { port?: number }) {
   })
     .on('change', pathUpdated));
 
+  (chokidar.watch('immaculata.config.{ts,js}', {
+    ignoreInitial: true,
+    cwd: process.cwd(),
+  })
+    .on('change', pathUpdated));
+
   (chokidar.watch(runtime.siteDir, {
     ignoreInitial: true,
     cwd: process.cwd(),
