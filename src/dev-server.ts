@@ -42,10 +42,17 @@ export function startDevServer(runtime: Runtime, config?: { port?: number }) {
     }, 100)
   };
 
-  (chokidar.watch('package.json', { ignoreInitial: true, cwd: process.cwd() })
+  (chokidar.watch('package.json', {
+    ignoreInitial: true,
+    cwd: process.cwd(),
+  })
     .on('change', pathUpdated));
 
-  (chokidar.watch(runtime.siteDir, { ignoreInitial: true, cwd: process.cwd() })
+  (chokidar.watch(runtime.siteDir, {
+    ignoreInitial: true,
+    cwd: process.cwd(),
+    ignored: str => str.endsWith('.tsbuildinfo'),
+  })
     .on('add', pathUpdated)
     .on('change', pathUpdated)
     .on('unlink', pathUpdated))
