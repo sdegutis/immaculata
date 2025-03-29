@@ -14,6 +14,7 @@ export class Runtime {
   handlers = new Map<string, (body: string) => string>();
   compiler = new Compiler();
 
+  ignore?: (path: string) => boolean
   siteDir
   #processor
   #jsxContentSsg: Uint8Array
@@ -41,6 +42,8 @@ export class Runtime {
       this.compiler.userConfig ??
       this.files.get('/@imlib/processor.js')?.module?.require()
     )
+
+    this.ignore = userConfig["ignore"]
 
     const processor: SiteProcessor = (
       userConfig?.["default"] ??

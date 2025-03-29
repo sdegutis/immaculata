@@ -46,19 +46,19 @@ export function startDevServer(runtime: Runtime, config?: { port?: number }) {
     ignoreInitial: true,
     cwd: process.cwd(),
   })
-    .on('change', pathUpdated));
+    .on('change', pathUpdated))
 
-  (chokidar.watch('immaculata.config.{ts,js}', {
+  const opts: chokidar.WatchOptions = {
     ignoreInitial: true,
     cwd: process.cwd(),
-  })
+  }
+
+  if (runtime.ignore) opts.ignored = runtime.ignore;
+
+  (chokidar.watch('immaculata.config.{ts,js}', opts)
     .on('change', pathUpdated));
 
-  (chokidar.watch(runtime.siteDir, {
-    ignoreInitial: true,
-    cwd: process.cwd(),
-    ignored: str => str.endsWith('.tsbuildinfo'),
-  })
+  (chokidar.watch(runtime.siteDir, opts)
     .on('add', pathUpdated)
     .on('change', pathUpdated)
     .on('unlink', pathUpdated))
