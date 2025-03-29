@@ -21,6 +21,7 @@ export class Compiler {
     return {
       code: babel.transformSync(code, {
         filename: realFilePath ?? browserFilePath,
+        sourceMaps: 'inline',
         plugins: [
           ...(realFilePath ? [require('@babel/plugin-transform-modules-commonjs')] : []),
           [require('@babel/plugin-transform-typescript'), { isTSX: true }],
