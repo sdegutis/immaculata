@@ -14,7 +14,7 @@ export function startDevServer(runtime: Runtime, config?: {
 
   server.handlers = runtime.handlers
 
-  const outfiles = runtime.build()
+  const outfiles = runtime.process()
   server.files = outfiles
 
   const updatedPaths = new Set<string>()
@@ -30,7 +30,7 @@ export function startDevServer(runtime: Runtime, config?: {
       try {
         runtime.pathsUpdated(...updatedPaths)
 
-        const outfiles = runtime.build()
+        const outfiles = runtime.process()
         server.files = outfiles
 
         updatedPaths.clear()

@@ -3,7 +3,7 @@ import * as path from 'path/posix'
 import { Runtime } from './runtime.ts'
 
 export function generateFiles(runtime: Runtime) {
-  const out = runtime.build()!
+  const out = runtime.process()!
 
   const madeDirs = new Set<string>()
   const mkdirIfNeeded = (dir: string) => {

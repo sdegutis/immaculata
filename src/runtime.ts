@@ -22,7 +22,7 @@ export class Runtime {
   handlers = new Map<string, (body: string) => string>();
   compiler = new Compiler(this.jsxPathNode, this.jsxPathBrowser);
 
-  build() {
+  process() {
     this.#shimIfNeeded(this.jsxPathBrowser, this.jsxContentBrowser)
     this.#shimIfNeeded(this.jsxPathNode, this.jsxContentSsg)
 
@@ -32,7 +32,7 @@ export class Runtime {
     return new Map<string, Uint8Array | string>(outFiles.map(f => [f.path, f.content]))
   }
 
-  rebuildAll() {
+  loadTree() {
     this.#loadDir('/')
   }
 
