@@ -5,5 +5,5 @@ export * as jsxDom from './jsx-dom.ts'
 export * as jsxStrings from './jsx-strings.ts'
 export { Module } from './module.ts'
 export { Runtime } from './runtime.ts'
-export * from './ssp.ts'
+export { processFile, processSite } from './ssp.ts'
 
