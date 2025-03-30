@@ -20,7 +20,7 @@ export function processFile(file: FsFile): { path: string, content: string | Uin
     out.push({ path: file.path.slice(0, -3), content: exportedContent })
   }
   else {
-    out.push({ path: file.path, content: file.content })
+    out.push(file)
   }
 
   return out
