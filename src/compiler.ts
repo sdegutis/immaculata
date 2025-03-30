@@ -1,8 +1,8 @@
 import * as babel from '@babel/core'
-import * as module from 'node:module'
+import { createRequire } from 'node:module'
 import { convertTsExts } from './file.ts'
 
-const require = module.Module.createRequire(import.meta.url)
+const require = createRequire(import.meta.url)
 
 export class Compiler {
 
