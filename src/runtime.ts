@@ -33,17 +33,10 @@ export class Runtime {
   }
 
   rebuildAll() {
-    this.compiler = new Compiler(this.jsxPathNode, this.jsxPathBrowser)
     this.#loadDir('/')
   }
 
   pathsUpdated(...paths: string[]) {
-    if (paths.includes('package.json')) {
-      console.log('rebuilding all')
-      this.rebuildAll()
-      return
-    }
-
     const filepaths = paths.map(p => p.slice(this.siteDir.length))
 
     for (const filepath of filepaths) {

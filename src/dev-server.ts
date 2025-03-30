@@ -42,13 +42,7 @@ export function startDevServer(runtime: Runtime, config?: {
 
       console.log('Done.')
     }, 100)
-  };
-
-  (chokidar.watch('package.json', {
-    ignoreInitial: true,
-    cwd: process.cwd(),
-  })
-    .on('change', pathUpdated))
+  }
 
   const opts: chokidar.WatchOptions = {
     ignoreInitial: true,
