@@ -57,9 +57,6 @@ export function startDevServer(runtime: Runtime, config?: {
 
   if (config?.ignore) opts.ignored = config.ignore;
 
-  (chokidar.watch('immaculata.config.{ts,js}', opts)
-    .on('change', pathUpdated));
-
   (chokidar.watch(runtime.siteDir, opts)
     .on('add', pathUpdated)
     .on('change', pathUpdated)
