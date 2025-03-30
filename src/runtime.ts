@@ -39,12 +39,12 @@ export class Runtime {
     this.#shimIfNeeded(this.compiler.jsxPathBrowser, this.#jsxContentBrowser)
     this.#shimIfNeeded(this.compiler.jsxPathNode, this.#jsxContentSsg)
 
-    const userConfig: Record<string, any> = (
+    const userConfig: Record<string, any> | undefined = (
       this.compiler.userConfig ??
       this.files.get('/@imlib/processor.js')?.module?.require()
     )
 
-    this.ignore = userConfig["ignore"]
+    this.ignore = userConfig?.["ignore"]
 
     const processor: SiteProcessor = (
       userConfig?.["default"] ??
