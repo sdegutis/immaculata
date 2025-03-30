@@ -18,7 +18,6 @@ export class Compiler {
   }
 
   compile(code: string, realFilePath?: string, browserFilePath?: string) {
-    const imports = new Set<string>()
     return {
       code: babel.transformSync(code, {
         filename: realFilePath ?? browserFilePath,
@@ -28,14 +27,13 @@ export class Compiler {
           [require('@babel/plugin-transform-typescript'), { isTSX: true }],
           [require('@babel/plugin-syntax-import-attributes')],
           [require('@babel/plugin-transform-react-jsx'), { runtime: 'automatic', importSource: '/@imlib', throwIfNamespace: false }],
-          this.#collectImports(!!browserFilePath, imports),
+          this.#collectImports(!!browserFilePath),
         ],
       })!.code!,
-      imports,
     }
   }
 
-  #collectImports(inBrowser: boolean, imports: Set<string>): babel.PluginItem {
+  #collectImports(inBrowser: boolean): babel.PluginItem {
     return {
       visitor: {
         ImportDeclaration: {
@@ -47,9 +45,6 @@ export class Compiler {
               path.node.source.value = (inBrowser
                 ? convertTsExts(this.jsxPathBrowser)
                 : convertTsExts(this.jsxPathNode))
-            }
-            else {
-              imports.add(dep)
             }
           },
         }
