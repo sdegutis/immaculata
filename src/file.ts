@@ -15,7 +15,7 @@ export class File implements FsFile {
     this.path = path
     this.content = content
     if (path.match(/\.tsx?$/)) {
-      const code = typeof content === 'string' ? content : new TextDecoder().decode(content)
+      const code = content.toString()
       this.module = new Module(code, this.path, runtime)
       this.content = runtime.compiler.compile(code, undefined, path).code
       this.path = convertTsExts(path)
