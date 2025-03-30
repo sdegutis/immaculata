@@ -1,5 +1,8 @@
+import { createRequire } from 'node:module'
 import * as path from "path/posix"
 import { Runtime } from "./runtime.ts"
+
+const require = createRequire(import.meta.url)
 
 export class Module {
 

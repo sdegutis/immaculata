@@ -1,7 +1,10 @@
 import * as babel from '@babel/core'
 import { readFileSync } from 'fs'
+import * as module from 'node:module'
 import * as path from 'path'
 import { convertTsExts } from './file.ts'
+
+const require = module.Module.createRequire(import.meta.url)
 
 export class Compiler {
 

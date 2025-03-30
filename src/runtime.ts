@@ -1,11 +1,12 @@
 import * as fs from "fs"
 import * as path from "path/posix"
+import { fileURLToPath } from "url"
 import { Compiler } from "./compiler.ts"
 import { convertTsExts, File } from "./file.ts"
 import { processSite, type SiteProcessor } from "./ssp.ts"
 
-const jsxDom = fs.readFileSync(__dirname + './jsx-dom.ts')
-const jsxStrings = fs.readFileSync(__dirname + './jsx-strings.ts')
+const jsxDom = fs.readFileSync(fileURLToPath(import.meta.resolve('./jsx-dom.ts')))
+const jsxStrings = fs.readFileSync(fileURLToPath(import.meta.resolve('./jsx-strings.ts')))
 
 export class Runtime {
 
