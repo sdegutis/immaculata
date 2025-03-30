@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { startDevServer } from './dev-server.js'
-import { generateFiles } from './file-generator.js'
-import { Runtime } from './runtime.js'
+import { startDevServer } from './dev-server.ts'
+import { generateFiles } from './file-generator.ts'
+import { Runtime } from './runtime.ts'
 
 const fns = {
   dev: () => startDevServer(new Runtime()),

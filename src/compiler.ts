@@ -1,7 +1,7 @@
 import * as babel from '@babel/core'
 import { readFileSync } from 'fs'
 import * as path from 'path'
-import { convertTsExts } from './file.js'
+import { convertTsExts } from './file.ts'
 
 export class Compiler {
 

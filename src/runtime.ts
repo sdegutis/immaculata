@@ -1,11 +1,11 @@
 import * as fs from "fs"
 import * as path from "path/posix"
-import { Compiler } from "./compiler.js"
-import { convertTsExts, File } from "./file.js"
-import { processSite, SiteProcessor } from "./ssp.js"
+import { Compiler } from "./compiler.ts"
+import { convertTsExts, File } from "./file.ts"
+import { processSite, type SiteProcessor } from "./ssp.ts"
 
-const jsxDom = fs.readFileSync(__dirname + '/../src/jsx-dom.ts')
-const jsxStrings = fs.readFileSync(__dirname + '/../src/jsx-strings.ts')
+const jsxDom = fs.readFileSync(__dirname + './jsx-dom.ts')
+const jsxStrings = fs.readFileSync(__dirname + './jsx-strings.ts')
 
 export class Runtime {
 

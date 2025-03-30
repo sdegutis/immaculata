@@ -2,7 +2,7 @@ import * as chokidar from 'chokidar'
 import * as http from "http"
 import * as mimetypes from 'mime-types'
 import * as path from 'path'
-import { Runtime } from './runtime.js'
+import { Runtime } from './runtime.ts'
 
 export function startDevServer(runtime: Runtime, config?: { port?: number }) {
   process.env['DEV'] = '1'

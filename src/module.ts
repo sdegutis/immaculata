@@ -1,5 +1,5 @@
 import * as path from "path/posix"
-import { Runtime } from "./runtime.js"
+import { Runtime } from "./runtime.ts"
 
 export class Module {
 
@@ -9,11 +9,18 @@ export class Module {
   source
   imports: Set<string> | undefined
 
+  private content: string
+  filepath: string
+  private runtime: Runtime
+
   constructor(
-    private content: string,
-    public filepath: string,
-    private runtime: Runtime
+    content: string,
+    filepath: string,
+    runtime: Runtime,
   ) {
+    this.content = content
+    this.filepath = filepath
+    this.runtime = runtime
     this.source = content
   }
 

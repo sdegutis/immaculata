@@ -9,6 +9,7 @@
     "build": "tsc --build",
     "watch": "tsc --build --watch"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sdegutis/immaculata.dev.git"
