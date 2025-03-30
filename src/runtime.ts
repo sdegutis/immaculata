@@ -22,8 +22,8 @@ export class Runtime {
   #jsxContentBrowser: Uint8Array
 
   constructor(config?: {
-    siteDir: string,
-    processor: SiteProcessor,
+    siteDir?: string,
+    processor?: SiteProcessor,
     jsxContentSsg?: Uint8Array,
     jsxContentBrowser?: Uint8Array,
   }
