@@ -26,8 +26,7 @@ export class Runtime {
     processor?: SiteProcessor,
     jsxContentSsg?: Uint8Array,
     jsxContentBrowser?: Uint8Array,
-  }
-  ) {
+  }) {
     this.siteDir = config?.siteDir ?? 'site'
     this.rebuildAll()
     this.#processor = config?.processor ?? processSite
