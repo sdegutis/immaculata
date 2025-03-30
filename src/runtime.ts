@@ -22,6 +22,10 @@ export class Runtime {
   handlers = new Map<string, (body: string) => string>();
   compiler = new Compiler(this.jsxPathNode, this.jsxPathBrowser);
 
+  loadTree() {
+    this.#loadDir('/')
+  }
+
   process() {
     this.#shimIfNeeded(this.jsxPathBrowser, this.jsxContentBrowser)
     this.#shimIfNeeded(this.jsxPathNode, this.jsxContentSsg)
@@ -30,10 +34,6 @@ export class Runtime {
     const outFiles = this.processor([...this.files.values()])
     console.log(`Time: ${Date.now() - start} ms`)
     return new Map<string, Uint8Array | string>(outFiles.map(f => [f.path, f.content]))
-  }
-
-  loadTree() {
-    this.#loadDir('/')
   }
 
   pathsUpdated(...paths: string[]) {
