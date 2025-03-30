@@ -1,7 +1,6 @@
 import * as babel from '@babel/core'
 import { readFileSync } from 'fs'
 import * as module from 'node:module'
-import * as path from 'path'
 import { convertTsExts } from './file.ts'
 
 const require = module.Module.createRequire(import.meta.url)
@@ -9,14 +8,16 @@ const require = module.Module.createRequire(import.meta.url)
 export class Compiler {
 
   packageJson = JSON.parse(readFileSync('package.json').toString('utf8'))
-  jsxPathNode: string
-  jsxPathBrowser: string
-  userConfig: Record<string, any> | null
 
-  constructor() {
-    this.userConfig = this.#loadConfigFile()
-    this.jsxPathBrowser = this.userConfig?.['jsxPathBrowser'] ?? '/@imlib/jsx-browser.ts'
-    this.jsxPathNode = this.userConfig?.['jsxPathNode'] ?? '/@imlib/jsx-node.ts'
+  jsxPathNode
+  jsxPathBrowser
+
+  constructor(
+    jsxPathNode: string,
+    jsxPathBrowser: string,
+  ) {
+    this.jsxPathNode = jsxPathNode
+    this.jsxPathBrowser = jsxPathBrowser
   }
 
   compile(code: string, realFilePath?: string, browserFilePath?: string) {
@@ -59,16 +60,4 @@ export class Compiler {
     }
   }
 
-  #loadConfigFile(): Record<string, any> | null {
-    try { return requireFromProject('immaculata.config.ts') }
-    catch {
-      try { return requireFromProject('immaculata.config.js') }
-      catch { return null }
-    }
-  }
-
-}
-
-function requireFromProject(filename: string) {
-  return require(path.join(process.cwd(), filename))
 }

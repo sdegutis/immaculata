@@ -10,23 +10,24 @@ const jsxStrings = fs.readFileSync(fileURLToPath(import.meta.resolve('./jsx-stri
 
 export class Runtime {
 
-  files = new Map<string, File>();
-  #deps = new Map<string, Set<string>>();
-  handlers = new Map<string, (body: string) => string>();
-  compiler = new Compiler();
-
   ignore?: (path: string) => boolean
   siteDir = 'site'
   processor = processSite
   jsxContentSsg = jsxStrings
   jsxContentBrowser = jsxDom
+  jsxPathNode = '/@imlib/jsx-node.ts'
+  jsxPathBrowser = '/@imlib/jsx-browser.ts'
+
+  files = new Map<string, File>();
+  #deps = new Map<string, Set<string>>();
+  handlers = new Map<string, (body: string) => string>();
+  compiler = new Compiler(this.jsxPathNode, this.jsxPathBrowser);
 
   build() {
-    this.#shimIfNeeded(this.compiler.jsxPathBrowser, this.jsxContentBrowser)
-    this.#shimIfNeeded(this.compiler.jsxPathNode, this.jsxContentSsg)
+    this.#shimIfNeeded(this.jsxPathBrowser, this.jsxContentBrowser)
+    this.#shimIfNeeded(this.jsxPathNode, this.jsxContentSsg)
 
     const userConfig: Record<string, any> | undefined = (
-      this.compiler.userConfig ??
       this.files.get('/@imlib/processor.js')?.module?.require()
     )
 
@@ -44,7 +45,7 @@ export class Runtime {
   }
 
   rebuildAll() {
-    this.compiler = new Compiler()
+    this.compiler = new Compiler(this.jsxPathNode, this.jsxPathBrowser)
     this.#loadDir('/')
   }
 
