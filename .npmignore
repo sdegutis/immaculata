@@ -1,5 +1,3 @@
 *
-!out/**
+!src/**
 !runtime.d.ts
-!src/jsx-dom.ts
-!src/jsx-strings.ts
