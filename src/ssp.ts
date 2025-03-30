@@ -1,14 +1,7 @@
 export type SiteProcessor = (files: FsFile[]) => FsFile[]
 
-export const processSite: SiteProcessor = (inFiles) => {
-  const outFiles: FsFile[] = []
-  for (const file of inFiles) {
-    for (const { path, content } of processFile(file)) {
-      outFiles.push({ path, content })
-    }
-  }
-  return outFiles
-}
+export const processSite: SiteProcessor =
+  (inFiles) => inFiles.flatMap(processFile)
 
 const isArrayFile = /\/.*(?<slug>\[.+\]).*\..+\.js$/
 const isSingleFile = /\..+\.js$/
