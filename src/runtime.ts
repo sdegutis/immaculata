@@ -31,8 +31,6 @@ export class Runtime {
       this.files.get('/@imlib/processor.js')?.module?.require()
     )
 
-    this.ignore = userConfig?.["ignore"]
-
     const processor: SiteProcessor = (
       userConfig?.["default"] ??
       this.processor
