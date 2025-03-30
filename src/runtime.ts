@@ -33,7 +33,7 @@ export class Runtime {
     const start = Date.now()
     const outFiles = this.processor([...this.files.values()])
     console.log(`Time: ${Date.now() - start} ms`)
-    return new Map<string, Uint8Array | string>(outFiles.map(f => [f.path, f.content]))
+    return new Map(outFiles.map(f => [f.path, f.content]))
   }
 
   pathsUpdated(...paths: string[]) {
