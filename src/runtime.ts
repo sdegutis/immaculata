@@ -16,27 +16,14 @@ export class Runtime {
   compiler = new Compiler();
 
   ignore?: (path: string) => boolean
-  siteDir
-  #processor
-  #jsxContentSsg: Uint8Array
-  #jsxContentBrowser: Uint8Array
-
-  constructor(config?: {
-    siteDir?: string,
-    processor?: SiteProcessor,
-    jsxContentSsg?: Uint8Array,
-    jsxContentBrowser?: Uint8Array,
-  }) {
-    this.siteDir = config?.siteDir ?? 'site'
-    this.rebuildAll()
-    this.#processor = config?.processor ?? processSite
-    this.#jsxContentSsg = config?.jsxContentSsg ?? jsxStrings
-    this.#jsxContentBrowser = config?.jsxContentBrowser ?? jsxDom
-  }
+  siteDir = 'site'
+  processor = processSite
+  jsxContentSsg = jsxStrings
+  jsxContentBrowser = jsxDom
 
   build() {
-    this.#shimIfNeeded(this.compiler.jsxPathBrowser, this.#jsxContentBrowser)
-    this.#shimIfNeeded(this.compiler.jsxPathNode, this.#jsxContentSsg)
+    this.#shimIfNeeded(this.compiler.jsxPathBrowser, this.jsxContentBrowser)
+    this.#shimIfNeeded(this.compiler.jsxPathNode, this.jsxContentSsg)
 
     const userConfig: Record<string, any> | undefined = (
       this.compiler.userConfig ??
@@ -47,7 +34,7 @@ export class Runtime {
 
     const processor: SiteProcessor = (
       userConfig?.["default"] ??
-      this.#processor
+      this.processor
     )
 
     const start = Date.now()
