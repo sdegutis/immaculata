@@ -6,10 +6,11 @@ import { Runtime } from './runtime.ts'
 
 export function startDevServer(runtime: Runtime, config?: {
   port?: number,
-  ignore?: (path: string) => boolean
+  ignore?: (path: string) => boolean,
+  hmrPath?: string,
 }) {
   const server = new Server()
-  server.startServer(config?.port ?? 8080)
+  server.startServer(config?.port ?? 8080, config?.hmrPath)
 
   server.handlers = runtime.handlers
 
@@ -74,18 +75,20 @@ class Server {
 
   #reloadables = new Set<http.ServerResponse>()
 
-  startServer(port: number) {
-    this.events.addEventListener('rebuilt', () => {
-      for (const client of this.#reloadables) {
-        console.log('Notifying SSE connection')
-        client.write('data: {}\n\n')
-      }
-    })
+  startServer(port: number, hmrPath?: string) {
+    if (hmrPath) {
+      this.events.addEventListener('rebuilt', () => {
+        for (const client of this.#reloadables) {
+          console.log('Notifying SSE connection')
+          client.write('data: {}\n\n')
+        }
+      })
+    }
 
     const server = http.createServer((req, res) => {
       const url = req.url!.split('?')[0]!
 
-      if (url === '/@imlib/hmr') {
+      if (url === hmrPath) {
         res.once('close', () => {
           this.#reloadables.delete(res)
         })
