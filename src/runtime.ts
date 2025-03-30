@@ -53,7 +53,7 @@ export class Runtime {
 
     const start = Date.now()
     const outFiles = new Map<string, Uint8Array | string>()
-    processor({ inFiles: this.files.values(), outFiles })
+    processor({ inFiles: [...this.files.values()], outFiles })
     console.log(`Time: ${Date.now() - start} ms`)
     return outFiles
   }

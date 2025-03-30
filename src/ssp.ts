@@ -1,5 +1,5 @@
 export type SiteProcessor = (data: {
-  inFiles: ReturnType<Map<string, FsFile>['values']>,
+  inFiles: FsFile[],
   outFiles: Map<string, Uint8Array | string>,
 }) => void
 
