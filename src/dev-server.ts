@@ -8,8 +8,6 @@ export function startDevServer(runtime: Runtime, config?: {
   port?: number,
   ignore?: (path: string) => boolean
 }) {
-  process.env['DEV'] = '1'
-
   const server = new Server()
   server.startServer(config?.port ?? 8080)
 
