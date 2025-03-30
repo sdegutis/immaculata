@@ -3,7 +3,7 @@ import * as path from "path/posix"
 import { fileURLToPath } from "url"
 import { Compiler } from "./compiler.ts"
 import { convertTsExts, File } from "./file.ts"
-import { processSite, type SiteProcessor } from "./ssp.ts"
+import { processSite } from "./ssp.ts"
 
 const jsxDom = fs.readFileSync(fileURLToPath(import.meta.resolve('./jsx-dom.ts')))
 const jsxStrings = fs.readFileSync(fileURLToPath(import.meta.resolve('./jsx-strings.ts')))
@@ -27,17 +27,8 @@ export class Runtime {
     this.#shimIfNeeded(this.jsxPathBrowser, this.jsxContentBrowser)
     this.#shimIfNeeded(this.jsxPathNode, this.jsxContentSsg)
 
-    const userConfig: Record<string, any> | undefined = (
-      this.files.get('/@imlib/processor.js')?.module?.require()
-    )
-
-    const processor: SiteProcessor = (
-      userConfig?.["default"] ??
-      this.processor
-    )
-
     const start = Date.now()
-    const outFiles = processor([...this.files.values()])
+    const outFiles = this.processor([...this.files.values()])
     console.log(`Time: ${Date.now() - start} ms`)
     return new Map<string, Uint8Array | string>(outFiles.map(f => [f.path, f.content]))
   }
