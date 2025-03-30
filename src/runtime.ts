@@ -52,10 +52,9 @@ export class Runtime {
     )
 
     const start = Date.now()
-    const outFiles = new Map<string, Uint8Array | string>()
-    processor({ inFiles: [...this.files.values()], outFiles })
+    const outFiles = processor([...this.files.values()])
     console.log(`Time: ${Date.now() - start} ms`)
-    return outFiles
+    return new Map<string, Uint8Array | string>(outFiles.map(f => [f.path, f.content]))
   }
 
   rebuildAll() {

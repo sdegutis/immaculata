@@ -1,14 +1,13 @@
-export type SiteProcessor = (data: {
-  inFiles: FsFile[],
-  outFiles: Map<string, Uint8Array | string>,
-}) => void
+export type SiteProcessor = (files: FsFile[]) => FsFile[]
 
-export const processSite: SiteProcessor = ({ inFiles, outFiles }) => {
+export const processSite: SiteProcessor = (inFiles) => {
+  const outFiles: FsFile[] = []
   for (const file of inFiles) {
     for (const { path, content } of processFile(file)) {
-      outFiles.set(path, content)
+      outFiles.push({ path, content })
     }
   }
+  return outFiles
 }
 
 const isArrayFile = /\/.*(?<slug>\[.+\]).*\..+\.js$/
