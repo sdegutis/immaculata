@@ -4,7 +4,10 @@ import * as mimetypes from 'mime-types'
 import * as path from 'path'
 import { Runtime } from './runtime.ts'
 
-export function startDevServer(runtime: Runtime, config?: { port?: number }) {
+export function startDevServer(runtime: Runtime, config?: {
+  port?: number,
+  ignore?: (path: string) => boolean
+}) {
   process.env['DEV'] = '1'
 
   const server = new Server()
@@ -53,7 +56,7 @@ export function startDevServer(runtime: Runtime, config?: { port?: number }) {
     cwd: process.cwd(),
   }
 
-  if (runtime.ignore) opts.ignored = runtime.ignore;
+  if (config?.ignore) opts.ignored = config.ignore;
 
   (chokidar.watch('immaculata.config.{ts,js}', opts)
     .on('change', pathUpdated));

@@ -10,7 +10,6 @@ const jsxStrings = fs.readFileSync(fileURLToPath(import.meta.resolve('./jsx-stri
 
 export class Runtime {
 
-  ignore?: (path: string) => boolean
   siteDir = 'site'
   processor: (files: FsFile[]) => FsFile[] = processSite
   jsxContentSsg = jsxStrings
