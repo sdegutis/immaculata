@@ -1,6 +1,6 @@
 {
   "name": "immaculata",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "out/index.js",
   "bin": {
     "immaculata": "out/cli.js"
@@ -13,7 +13,7 @@
     "type": "git",
     "url": "git+https://github.com/sdegutis/immaculata.dev.git"
   },
-  "keywords": [],
+  "keywords": [ ],
   "author": "Steven Degutis",
   "description": "Simple TypeScript/JSX SSG",
   "bugs": {
