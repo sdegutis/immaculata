@@ -12,7 +12,7 @@ export class Runtime {
 
   ignore?: (path: string) => boolean
   siteDir = 'site'
-  processor = processSite
+  processor: (files: FsFile[]) => FsFile[] = processSite
   jsxContentSsg = jsxStrings
   jsxContentBrowser = jsxDom
   jsxPathNode = '/@imlib/jsx-node.ts'
