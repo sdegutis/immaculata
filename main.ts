@@ -6,17 +6,20 @@ const require = createRequire(import.meta.url)
 const server = new immaculata.DevServer(8080, '/hmr')
 const tree = new immaculata.LiveTree('site', import.meta.url)
 
-// tree.enableModules(immaculata.makeSwcTransformJsx(() => 'immaculata/jsx-strings.ts'))
-tree.enableModules()
+tree.enableModules(immaculata.makeSwcTransformJsx(() => 'immaculata/jsx-strings.ts'))
+// tree.enableModules()
 
 processSite()
 
 function processSite() {
   const start = Date.now()
   const map = tree.processFiles(files => {
-    files = files.filter(f => !f.path.endsWith('x'))
+    // files = files.filter(f => !f.path.endsWith('x'))
     console.log('in here1')
-    require('./site/test1.tsx')
+
+    files = files.flatMap(f => immaculata.processFile(tree, f))
+
+    // require('./site/test1.tsx')
     console.log('in here2')
     return files
   })
@@ -27,8 +30,8 @@ function processSite() {
 
 tree.watch({}, async (paths) => {
   console.log('paths changed', paths)
-  server.reload()
   processSite()
+  server.reload()
 })
 
 console.log('in main')

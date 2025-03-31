@@ -15,5 +15,5 @@ class Foo {
 }
 
 const foo2 = new Foo()
-console.log(foo2.sauce)
+// console.log(foo2.sauce)
 
