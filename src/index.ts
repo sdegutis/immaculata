@@ -1,7 +1,6 @@
 export * from './dev-server.ts'
 export { generateFiles } from './file-generator.ts'
 export { File } from './file.ts'
-export * as jsxDomImpl from './jsx-dom.ts'
 export * as jsxStringsImpl from './jsx-strings.ts'
 export * from './livetree.ts'
 export { Module } from './module.ts'
