@@ -1,26 +1,30 @@
-import type { LiveFile } from "./livetree.ts"
+import { createRequire } from "module"
+import type { LiveFile, LiveTree } from "./livetree.ts"
 
-export const isArrayFile = /\/.*(?<slug>\[.+\]).*\..+\.js$/
-export const isSingleFile = /\..+\.js$/
+export const isArrayFile = /\/.*(?<slug>\[.+\]).*\..+\.tsx?$/
+export const isSingleFile = /\..+\.tsx?$/
 
-export function processFile(file: LiveFile): LiveFile[] {
+export function processFile(tree: LiveTree, file: LiveFile): LiveFile[] {
+  console.log(tree.base)
+  const require = createRequire(tree.base + '/')
+
   const out: LiveFile[] = []
 
-  // let match
-  // if (match = file.path.match(isArrayFile)) {
-  //   const exportedArray = file.module!.require().default as [string, any][]
-  //   for (const [name, content] of exportedArray) {
-  //     const filepath = file.path.replace(match.groups!["slug"]!, name)
-  //     out.push({ path: filepath.slice(0, -3), content })
-  //   }
-  // }
-  // else if (file.path.match(isSingleFile)) {
-  //   const exportedContent = file.module!.require().default
-  //   out.push({ path: file.path.slice(0, -3), content: exportedContent })
-  // }
-  // else {
-  //   out.push(file)
-  // }
+  let match
+  if (match = file.path.match(isArrayFile)) {
+    const exportedArray = require('.' + file.path).default as [string, any][]
+    for (const [name, content] of exportedArray) {
+      const filepath = file.path.replace(match.groups!["slug"]!, name)
+      out.push({ path: filepath.slice(0, -3), content })
+    }
+  }
+  else if (file.path.match(isSingleFile)) {
+    const exportedContent = require('.' + file.path).default
+    out.push({ path: file.path.slice(0, -3), content: exportedContent })
+  }
+  else {
+    out.push(file)
+  }
 
   return out
 }
