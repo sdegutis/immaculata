@@ -253,7 +253,7 @@ export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTra
         },
       },
     })
-    const oldJsxImport = uuid + '/jsx-runtime'
+    const oldJsxImport = `${uuid}/jsx-runtime`
     const newJsxImport = jsxImportSource(treeRoot, filename, src, tsx)
     return result.code.replace(oldJsxImport, newJsxImport)
   }
