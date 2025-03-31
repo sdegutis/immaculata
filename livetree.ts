@@ -222,7 +222,7 @@ export class LiveTree {
 
 }
 
-const defaultSwcTransformJsx = makeSwcTransformJsx(treeRoot => treeRoot)
+const defaultSwcTransformJsx = makeSwcTransformJsx(treeRoot => treeRoot + '/jsx-node.ts')
 
 export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTransformer>) => string): JsxTransformer {
   const uuid = randomUUID()
@@ -245,6 +245,8 @@ export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTra
         },
       },
     })
-    return result.code.replace(uuid + '/jsx-runtime', jsxImportSource(treeRoot, filename, src, tsx))
+    const oldJsxImport = uuid + '/jsx-runtime'
+    const newJsxImport = jsxImportSource(treeRoot, filename, src, tsx)
+    return result.code.replace(oldJsxImport, newJsxImport)
   }
 }
