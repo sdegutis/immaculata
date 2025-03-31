@@ -5,7 +5,6 @@ export const isArrayFile = /\/.*(?<slug>\[.+\]).*\..+(?<ext>\.tsx?)$/
 export const isSingleFile = /\..+(?<ext>\.tsx?)$/
 
 export function processFile(tree: LiveTree, file: LiveFile): LiveFile[] {
-  console.log(tree.base)
   const require = createRequire(tree.base + '/')
 
   const out: LiveFile[] = []
