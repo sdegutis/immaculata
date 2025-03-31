@@ -2,8 +2,8 @@ import * as immaculata from "immaculata"
 
 const tree = new immaculata.LiveTree('site', import.meta.url)
 
-// const tsx = immaculata.makeSwcTransformJsx(() => 'immaculata/src/jsx-strings.ts')
-const tsx = immaculata.makeSwcTransformJsx(root => root + '/jsx-runtime.ts')
+const tsx = immaculata.makeSwcTransformJsx(() => 'immaculata/src/jsx-strings.ts')
+// const tsx = immaculata.makeSwcTransformJsx(root => root + '/jsx-runtime.ts')
 
 tree.enableModules(tsx)
 
