@@ -18,15 +18,9 @@ registerHooks({
   resolve: (url, context, next) => {
     let path = new URL(url, context.parentURL).href
 
-    console.log('resolve1', [url])
-    console.log('resolve2', [path])
-    console.log('resolve3', [siteBase])
-
     if (path.startsWith(siteBase)) {
-      console.log('resolve4', [context.parentURL])
 
       if (context.parentURL.startsWith(siteBase)) {
-        console.log('resolve5', [context.parentURL])
         const depending = context.parentURL.slice(siteBase.length).replace(/\?ver=\d+$/, '')
         const depended = path.slice(siteBase.length)
         tree.addDep(depending, depended)
@@ -37,7 +31,7 @@ registerHooks({
         tree.files.get(rel) ??
         tree.files.get(rel + '.ts') ??
         tree.files.get(rel + '.tsx') ??
-        tree.files.get(rel + '.js'))
+        tree.files.get(rel + '.jsx'))
 
       const newurl = new URL('.' + found.path, siteBase + '/')
       newurl.search = `ver=${found.version}`

@@ -1,5 +1,5 @@
 import * as fs from "fs"
-import * as path from "path/posix"
+import { join } from "path/posix"
 
 export class LiveTree {
 
@@ -7,7 +7,6 @@ export class LiveTree {
 
   files = new Map<string, { path: string, content: Buffer, version: number }>();
   #deps = new Map<string, Set<string>>();
-  updates = 0
 
   loadTree() {
     this.#loadDir('/')
@@ -17,43 +16,37 @@ export class LiveTree {
     const dirRealPath = this.realPathFor(base)
     const files = fs.readdirSync(dirRealPath)
     for (const name of files) {
-      const realFilePath = path.join(dirRealPath, name)
+      const realFilePath = join(dirRealPath, name)
       const stat = fs.statSync(realFilePath)
 
       if (stat.isDirectory()) {
-        this.#loadDir(path.join(base, name))
+        this.#loadDir(join(base, name))
       }
       else if (stat.isFile()) {
-        const filepath = path.join(base, name)
+        const filepath = join(base, name)
         this.#createFile(filepath)
       }
     }
   }
 
-  #createFile(filepath: string) {
-    this.#putFile(filepath, fs.readFileSync(this.realPathFor(filepath)))
-  }
-
-  #putFile(filepath: string, content: Buffer) {
-    this.files.set(filepath, { path: filepath, content, version: this.updates })
+  #createFile(path: string) {
+    const content = fs.readFileSync(this.realPathFor(path))
+    const version = Date.now()
+    this.files.set(path, { path: path, content, version })
   }
 
   private realPathFor(filepath: string) {
-    return path.join(this.root, filepath)
+    return join(this.root, filepath)
   }
 
   addDep(requiredBy: string, requiring: string) {
-    console.log('adddep', [requiredBy, requiring])
     let list = this.#deps.get(requiring)
     if (!list) this.#deps.set(requiring, list = new Set())
     list.add(requiredBy)
   }
 
   pathsUpdated(...paths: string[]) {
-    this.updates++
     const filepaths = paths.map(p => p.slice(this.root.length))
-
-    console.log(filepaths)
 
     for (const filepath of filepaths) {
       if (fs.existsSync(this.realPathFor(filepath))) {
@@ -79,7 +72,7 @@ export class LiveTree {
         this.#deps.delete(requiring)
         for (const dep of requiredBy) {
           const file = this.files.get(dep)
-          file.version++
+          file.version = Date.now()
           this.#resetDepTree(dep, seen)
         }
       }
