@@ -1,13 +1,9 @@
 import * as swc from '@swc/core'
-import * as chokidar from 'chokidar'
 import { registerHooks } from 'module'
-import * as path from 'path'
 import { dirname, relative } from "path/posix"
 import { LiveTree } from "./livetree.ts"
 
 const tree = new LiveTree('site', import.meta.url)
-
-
 
 
 registerHooks({
@@ -83,50 +79,17 @@ registerHooks({
 
 })
 
+tree.watch({}, async (paths) => {
+  console.log('paths changed', paths)
 
 
+  await import('./site/test1.tsx')
+  await import('./site/test1.tsx')
+  await import('./site/test1.tsx')
 
-const updatedPaths = new Set<string>()
-let reloadFsTimer: NodeJS.Timeout
+})
 
-const pathUpdated = (filePath: string) => {
-  updatedPaths.add(filePath.split(path.sep).join(path.posix.sep))
-  clearTimeout(reloadFsTimer)
-  reloadFsTimer = setTimeout(async () => {
-    console.log(' ')
-    console.log('Updated:', [...updatedPaths].map(p => '\n  ' + p).join(''))
-    console.log('Rebuilding site...')
 
-    try {
-      tree.pathsUpdated(...updatedPaths)
-
-      // const outfiles = runtime.process()
-      // server.files = outfiles
-
-      await import('./site/test1.tsx')
-      await import('./site/test1.tsx')
-      await import('./site/test1.tsx')
-
-      updatedPaths.clear()
-      // server.events.dispatchEvent(new Event('rebuilt'))
-    }
-    catch (e) {
-      console.error(e)
-    }
-
-    console.log('Done.')
-  }, 100)
-}
-
-const opts: chokidar.ChokidarOptions = {
-  ignoreInitial: true,
-  cwd: process.cwd(),
-}
-
-chokidar.watch(tree.root, opts)
-  .on('add', pathUpdated)
-  .on('change', pathUpdated)
-  .on('unlink', pathUpdated)
 
 console.log('in main')
 

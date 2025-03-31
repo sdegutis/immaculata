@@ -1,5 +1,6 @@
+import * as chokidar from 'chokidar'
 import * as fs from "fs"
-import { join } from "path/posix"
+import posix from "path/posix"
 
 export class LiveTree {
 
@@ -19,14 +20,14 @@ export class LiveTree {
     const dirRealPath = this.#realPathFor(base)
     const files = fs.readdirSync(dirRealPath)
     for (const name of files) {
-      const realFilePath = join(dirRealPath, name)
+      const realFilePath = posix.join(dirRealPath, name)
       const stat = fs.statSync(realFilePath)
 
       if (stat.isDirectory()) {
-        this.#loadDir(join(base, name))
+        this.#loadDir(posix.join(base, name))
       }
       else if (stat.isFile()) {
-        const filepath = join(base, name)
+        const filepath = posix.join(base, name)
         this.#createFile(filepath)
       }
     }
@@ -35,11 +36,11 @@ export class LiveTree {
   #createFile(path: string) {
     const content = fs.readFileSync(this.#realPathFor(path))
     const version = Date.now()
-    this.files.set(path, { path: path, content, version })
+    this.files.set(path, { path, content, version })
   }
 
   #realPathFor(filepath: string) {
-    return join(this.root, filepath)
+    return posix.join(this.root, filepath)
   }
 
   addDep(requiredBy: string, requiring: string) {
@@ -48,7 +49,7 @@ export class LiveTree {
     list.add(requiredBy)
   }
 
-  pathsUpdated(...paths: string[]) {
+  #pathsUpdated(...paths: string[]) {
     const filepaths = paths.map(p => p.slice(this.root.length))
 
     for (const filepath of filepaths) {
@@ -82,8 +83,44 @@ export class LiveTree {
     }
   }
 
-  #watch() {
+  watch(opts: chokidar.ChokidarOptions, onchange: (paths: Set<string>) => void) {
+    const updatedPaths = new Set<string>()
+    let reloadFsTimer: NodeJS.Timeout
 
+    const pathUpdated = (filePath: string) => {
+      updatedPaths.add(filePath.split(posix.win32.sep).join(posix.posix.sep))
+      clearTimeout(reloadFsTimer)
+      reloadFsTimer = setTimeout(async () => {
+        // console.log(' ')
+        // console.log('Updated:', [...updatedPaths].map(p => '\n  ' + p).join(''))
+        // console.log('Rebuilding site...')
+
+        try {
+          this.#pathsUpdated(...updatedPaths)
+          onchange(updatedPaths)
+          updatedPaths.clear()
+
+          // const outfiles = runtime.process()
+          // server.files = outfiles
+
+          // server.events.dispatchEvent(new Event('rebuilt'))
+        }
+        catch (e) {
+          console.error(e)
+        }
+
+        // console.log('Done.')
+      }, 100)
+    }
+
+    chokidar.watch(this.root, {
+      ...opts,
+      ignoreInitial: true,
+      cwd: process.cwd(),
+    })
+      .on('add', pathUpdated)
+      .on('change', pathUpdated)
+      .on('unlink', pathUpdated)
   }
 
 }
