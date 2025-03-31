@@ -8,9 +8,8 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
+      "skipFiles": [ "<node_internals>/**" ],
+      "runtimeArgs": [ "--disable-warning=ExperimentalWarning", "--watch-path=main.ts", "--watch-path=livetree.ts" ],
       "program": "${workspaceFolder}\\main.ts",
     }
   ]
