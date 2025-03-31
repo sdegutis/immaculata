@@ -1,6 +1,10 @@
+import * as swc from '@swc/core'
 import * as chokidar from 'chokidar'
 import * as fs from "fs"
-import posix from "path/posix"
+import { registerHooks } from 'module'
+import posix, { dirname, relative } from "path/posix"
+
+export type JsxTransformer = (src: string, tsx: boolean, treeRoot: string) => string
 
 export class LiveTree {
 
@@ -112,4 +116,99 @@ export class LiveTree {
       .on('unlink', pathUpdated)
   }
 
+  enableModules(transformJsx: JsxTransformer = swcTransformJsx) {
+
+    registerHooks({
+
+      resolve: (url, context, next) => {
+        let path = new URL(url, context.parentURL).href
+
+        if (path.startsWith(this.base)) {
+
+          if (context.parentURL?.startsWith(this.base)) {
+            const depending = context.parentURL.slice(this.base.length).replace(/\?ver=\d+$/, '')
+            const depended = path.slice(this.base.length)
+            this.addDep(depending, depended)
+          }
+
+          const rel = '/' + relative(this.base, path)
+          const found = (
+            this.files.get(rel) ??
+            this.files.get(rel + '.ts') ??
+            this.files.get(rel + '.tsx') ??
+            this.files.get(rel + '.jsx'))
+
+          if (!found) {
+            return next(url, context)
+          }
+
+          const newurl = new URL('.' + found.path, this.base + '/')
+          newurl.search = `ver=${found.version}`
+
+          return {
+            url: newurl.href,
+            shortCircuit: true,
+          }
+
+        }
+
+        return next(url, context)
+      },
+
+      load: (url, context, next) => {
+        if (url.startsWith(this.base)) {
+          url = url.replace(/\?ver=\d+$/, '')
+
+          const path = url.slice(this.base.length)
+          const found = this.files.get(path)
+
+          if (!found) {
+            return next(url, context)
+          }
+
+          const tsx = path.endsWith('.tsx')
+          const jsx = path.endsWith('.jsx')
+
+          if (tsx || jsx) {
+            const toRoot = relative(dirname(url), this.base) || '.'
+            const output = transformJsx(found.content.toString(), tsx, toRoot)
+            return {
+              format: 'module',
+              shortCircuit: true,
+              source: output,
+            }
+          }
+
+          return {
+            format: path.match(/\.tsx?$/) ? 'module-typescript' : 'module',
+            shortCircuit: true,
+            source: found.content,
+          }
+        }
+
+        return next(url, context)
+      }
+
+    })
+
+  }
+
+}
+
+function swcTransformJsx(src: string, tsx: boolean, treeRoot: string) {
+  const result = swc.transformSync(src, {
+    isModule: true,
+    jsc: {
+      parser: tsx
+        ? { syntax: 'typescript', tsx: true }
+        : { syntax: 'ecmascript', jsx: true },
+      transform: {
+        react: {
+          runtime: 'automatic',
+          importSource: treeRoot,
+        },
+      },
+    },
+  })
+  return result.code
 }
