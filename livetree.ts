@@ -91,25 +91,14 @@ export class LiveTree {
       updatedPaths.add(filePath.split(posix.win32.sep).join(posix.posix.sep))
       clearTimeout(reloadFsTimer)
       reloadFsTimer = setTimeout(async () => {
-        // console.log(' ')
-        // console.log('Updated:', [...updatedPaths].map(p => '\n  ' + p).join(''))
-        // console.log('Rebuilding site...')
-
         try {
           this.#pathsUpdated(...updatedPaths)
           onchange(updatedPaths)
           updatedPaths.clear()
-
-          // const outfiles = runtime.process()
-          // server.files = outfiles
-
-          // server.events.dispatchEvent(new Event('rebuilt'))
         }
         catch (e) {
           console.error(e)
         }
-
-        // console.log('Done.')
       }, 100)
     }
 
