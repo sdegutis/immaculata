@@ -4,14 +4,15 @@ const server = new immaculata.DevServer(8080, '/hmr')
 
 const tree = new immaculata.LiveTree('site', import.meta.url)
 
+processSite()
+
 function processSite() {
-
-  const files = tree.files.values().toArray()
-
-  const map = new Map(files.map(f => [f.path, f.content]))
-
+  const map = tree.processFiles(files => {
+    files = files.filter(f => !f.path.endsWith('x'))
+    return files
+  })
   server.files = map
-
+  immaculata.generateFiles(map, true)
 }
 
 tree.watch({}, async (paths) => {
