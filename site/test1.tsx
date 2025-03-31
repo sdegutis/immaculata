@@ -1,4 +1,4 @@
 import { asdf } from "./foo/test2.jsx"
 
-const foo: number = 1234
+export const foo: number = 1234
 console.log('in test2.tsx', foo, <foo />, asdf)

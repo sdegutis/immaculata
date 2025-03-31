@@ -3,8 +3,11 @@ import * as path from "path/posix"
 
 export class LiveTree {
 
-  siteDir = 'site'
-  files = new Map<string, { path: string, content: Uint8Array, version: number }>();
+  root = 'site'
+
+  files = new Map<string, { path: string, content: Buffer, version: number }>();
+  #deps = new Map<string, Set<string>>();
+  updates = 0
 
   loadTree() {
     this.#loadDir('/')
@@ -31,16 +34,61 @@ export class LiveTree {
     this.#putFile(filepath, fs.readFileSync(this.realPathFor(filepath)))
   }
 
-  #putFile(filepath: string, content: Uint8Array) {
-    this.files.set(filepath, { path: filepath, content, version: 1 })
+  #putFile(filepath: string, content: Buffer) {
+    this.files.set(filepath, { path: filepath, content, version: this.updates })
   }
 
-  realPathFor(filepath: string) {
-    return path.join(this.siteDir, filepath)
+  private realPathFor(filepath: string) {
+    return path.join(this.root, filepath)
   }
 
-  addDep(depending: string, depended: string) {
+  addDep(requiredBy: string, requiring: string) {
+    console.log('adddep', [requiredBy, requiring])
 
+    let list = this.#deps.get(requiring)
+    if (!list) this.#deps.set(requiring, list = new Set())
+    list.add(requiredBy)
+  }
+
+  pathsUpdated(...paths: string[]) {
+    this.updates++
+    const filepaths = paths.map(p => p.slice(this.root.length))
+
+    console.log(this.#deps)
+
+    for (const filepath of filepaths) {
+      if (fs.existsSync(this.realPathFor(filepath))) {
+        this.#createFile(filepath)
+      }
+      else {
+        this.files.delete(filepath)
+      }
+    }
+
+    const resetSeen = new Set<string>()
+    for (const filepath of filepaths) {
+      this.#resetDepTree(filepath, resetSeen)
+    }
+  }
+
+  #resetDepTree(path: string, seen: Set<string>) {
+    if (seen.has(path)) return
+    seen.add(path)
+
+    for (const [requiring, requiredBy] of this.#deps) {
+      if (path.startsWith(requiring)) {
+        this.#deps.delete(requiring)
+        for (const dep of requiredBy) {
+
+          console.log('    reset exports of', dep)
+
+          const file = this.files.get(dep)
+          file.version++
+
+          this.#resetDepTree(dep, seen)
+        }
+      }
+    }
   }
 
 }
