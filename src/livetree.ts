@@ -20,7 +20,7 @@ export type JsxTransformer = (
   tsx: boolean,
 ) => string
 
-type LiveFile = { path: string, content: string | Buffer }
+export type LiveFile = { path: string, content: string | Buffer }
 
 export class LiveTree {
 
