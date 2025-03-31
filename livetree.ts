@@ -11,12 +11,12 @@ export class LiveTree {
 
   constructor(root: string, importMetaUrl: string) {
     this.root = root
-    this.base = new URL(this.root, import.meta.url).href
+    this.base = new URL(this.root, importMetaUrl).href
     this.#loadDir('/')
   }
 
   #loadDir(base: string) {
-    const dirRealPath = this.realPathFor(base)
+    const dirRealPath = this.#realPathFor(base)
     const files = fs.readdirSync(dirRealPath)
     for (const name of files) {
       const realFilePath = join(dirRealPath, name)
@@ -33,12 +33,12 @@ export class LiveTree {
   }
 
   #createFile(path: string) {
-    const content = fs.readFileSync(this.realPathFor(path))
+    const content = fs.readFileSync(this.#realPathFor(path))
     const version = Date.now()
     this.files.set(path, { path: path, content, version })
   }
 
-  private realPathFor(filepath: string) {
+  #realPathFor(filepath: string) {
     return join(this.root, filepath)
   }
 
@@ -52,7 +52,7 @@ export class LiveTree {
     const filepaths = paths.map(p => p.slice(this.root.length))
 
     for (const filepath of filepaths) {
-      if (fs.existsSync(this.realPathFor(filepath))) {
+      if (fs.existsSync(this.#realPathFor(filepath))) {
         this.#createFile(filepath)
       }
       else {
@@ -80,6 +80,10 @@ export class LiveTree {
         }
       }
     }
+  }
+
+  #watch() {
+
   }
 
 }
