@@ -200,8 +200,8 @@ function swcTransformJsx(src: string, tsx: boolean, treeRoot: string) {
     isModule: true,
     jsc: {
       parser: tsx
-        ? { syntax: 'typescript', tsx: true }
-        : { syntax: 'ecmascript', jsx: true },
+        ? { syntax: 'typescript', tsx: true, decorators: true }
+        : { syntax: 'ecmascript', jsx: true, decorators: true },
       transform: {
         react: {
           runtime: 'automatic',
