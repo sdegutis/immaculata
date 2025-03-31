@@ -20,6 +20,8 @@ export type JsxTransformer = (
   tsx: boolean,
 ) => string
 
+type LiveFile = { path: string, content: string | Buffer }
+
 export class LiveTree {
 
   root: string
@@ -32,6 +34,12 @@ export class LiveTree {
     this.root = root
     this.base = new URL(this.root, importMetaUrl).href
     this.#loadDir('/')
+  }
+
+  processFiles(fn: (files: LiveFile[]) => LiveFile[]) {
+    let files: LiveFile[] = [...this.files.values()]
+    files = fn(files)
+    return new Map(files.map(f => [f.path, f.content]))
   }
 
   #loadDir(base: string) {
