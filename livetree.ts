@@ -145,7 +145,7 @@ export class LiveTree {
     registerHooks({
 
       resolve: (url, context, next) => {
-        if (!url.match(/^[./]/)) {
+        if (!url.match(/^(\.|\/|file:\/\/\/)/)) {
           return next(url, context)
         }
 
