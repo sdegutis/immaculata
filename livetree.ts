@@ -3,10 +3,14 @@ import { join } from "path/posix"
 
 export class LiveTree {
 
-  root = 'site'
+  root: string
 
   files = new Map<string, { path: string, content: Buffer, version: number }>();
   #deps = new Map<string, Set<string>>();
+
+  constructor(root: string, importMetaUrl: string) {
+    this.root = root
+  }
 
   loadTree() {
     this.#loadDir('/')
@@ -71,7 +75,7 @@ export class LiveTree {
       if (path.startsWith(requiring)) {
         this.#deps.delete(requiring)
         for (const dep of requiredBy) {
-          const file = this.files.get(dep)
+          const file = this.files.get(dep)!
           file.version = Date.now()
           this.#resetDepTree(dep, seen)
         }

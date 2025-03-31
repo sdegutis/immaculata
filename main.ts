@@ -5,7 +5,7 @@ import * as path from 'path'
 import { dirname, relative } from "path/posix"
 import { LiveTree } from "./livetree.ts"
 
-const tree = new LiveTree()
+const tree = new LiveTree('site', import.meta.url)
 tree.loadTree()
 
 const siteBase = new URL(tree.root, import.meta.url).href
@@ -20,7 +20,7 @@ registerHooks({
 
     if (path.startsWith(siteBase)) {
 
-      if (context.parentURL.startsWith(siteBase)) {
+      if (context.parentURL?.startsWith(siteBase)) {
         const depending = context.parentURL.slice(siteBase.length).replace(/\?ver=\d+$/, '')
         const depended = path.slice(siteBase.length)
         tree.addDep(depending, depended)
@@ -32,6 +32,10 @@ registerHooks({
         tree.files.get(rel + '.ts') ??
         tree.files.get(rel + '.tsx') ??
         tree.files.get(rel + '.jsx'))
+
+      if (!found) {
+        return next(url, context)
+      }
 
       const newurl = new URL('.' + found.path, siteBase + '/')
       newurl.search = `ver=${found.version}`
@@ -52,6 +56,10 @@ registerHooks({
 
       const path = url.slice(siteBase.length)
       const found = tree.files.get(path)
+
+      if (!found) {
+        return next(url, context)
+      }
 
       const tsx = path.endsWith('.tsx')
       const jsx = path.endsWith('.jsx')
