@@ -70,8 +70,6 @@ export class LiveTree {
   }
 
   #addDep(requiredBy: string, requiring: string) {
-    if (requiredBy === '/noop.js') return // lol
-
     let list = this.#deps.get(requiring)
     if (!list) this.#deps.set(requiring, list = new Set())
     list.add(requiredBy)
@@ -155,7 +153,7 @@ export class LiveTree {
           return next(url, context)
         }
 
-        if (context.parentURL?.startsWith(this.base)) {
+        if (context.parentURL?.startsWith(this.base) && !context.parentURL.endsWith('/noop.js')) {
           const depending = context.parentURL.slice(this.base.length).replace(/\?ver=\d+$/, '')
           const depended = path.slice(this.base.length)
           this.#addDep(depending, depended)
