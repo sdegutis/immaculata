@@ -19,13 +19,7 @@
   },
   "homepage": "https://github.com/sdegutis/immaculata.dev#readme",
   "dependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/plugin-syntax-import-attributes": "^7.25.6",
-    "@babel/plugin-transform-modules-commonjs": "^7.24.8",
-    "@babel/plugin-transform-react-jsx": "^7.25.9",
-    "@babel/plugin-transform-typescript": "^7.25.2",
     "@swc/core": "^1.11.13",
-    "@types/babel__core": "^7.20.5",
     "chokidar": "^4.0.3",
     "mime-types": "^3.0.1"
   },
