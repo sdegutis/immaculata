@@ -13,10 +13,10 @@ declare module "module" {
 }
 
 export type JsxTransformer = (
+  treeRoot: string,
   filename: string,
   src: string,
   tsx: boolean,
-  treeRoot: string
 ) => string
 
 export class LiveTree {
@@ -129,11 +129,16 @@ export class LiveTree {
       .on('unlink', pathUpdated)
   }
 
-  enableModules(transformJsx: JsxTransformer = swcTransformJsx) {
+  enableModules(transformJsx: JsxTransformer = defaultSwcTransformJsx) {
 
     registerHooks({
 
       resolve: (url, context, next) => {
+        if (!url.match(/^[./]/)) {
+          console.log(url, /^[./]/.test(url))
+          return next(url, context)
+        }
+
         let path = new URL(url, context.parentURL).href
 
         if (path.startsWith(this.base)) {
@@ -185,7 +190,7 @@ export class LiveTree {
           if (tsx || jsx) {
             const toRoot = relative(dirname(url), this.base) || '.'
             const src = found.content.toString()
-            const output = transformJsx(url, src, tsx, toRoot)
+            const output = transformJsx(toRoot, url, src, tsx)
             return {
               format: 'module',
               shortCircuit: true,
@@ -209,10 +214,10 @@ export class LiveTree {
 
 }
 
-const swcTransformJsx = makeSwcTransformJsx((...[, , , treeRoot]) => treeRoot)
+const defaultSwcTransformJsx = makeSwcTransformJsx(treeRoot => treeRoot)
 
 export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTransformer>) => string): JsxTransformer {
-  return (filename, src, tsx, treeRoot) => {
+  return (treeRoot, filename, src, tsx) => {
     const result = swc.transformSync(src, {
       filename,
       isModule: true,
@@ -226,7 +231,7 @@ export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTra
         transform: {
           react: {
             runtime: 'automatic',
-            importSource: jsxImportSource(filename, src, tsx, treeRoot),
+            importSource: jsxImportSource(treeRoot, filename, src, tsx),
           },
         },
       },
