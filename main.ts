@@ -18,11 +18,16 @@ registerHooks({
   resolve: (url, context, next) => {
     let path = new URL(url, context.parentURL).href
 
+    console.log('resolve1', [url])
+    console.log('resolve2', [path])
+    console.log('resolve3', [siteBase])
+
     if (path.startsWith(siteBase)) {
-      context.parentURL = context.parentURL.replace(/\?ver=\d+$/, '')
+      console.log('resolve4', [context.parentURL])
 
       if (context.parentURL.startsWith(siteBase)) {
-        const depending = context.parentURL.slice(siteBase.length)
+        console.log('resolve5', [context.parentURL])
+        const depending = context.parentURL.slice(siteBase.length).replace(/\?ver=\d+$/, '')
         const depended = path.slice(siteBase.length)
         tree.addDep(depending, depended)
       }
@@ -89,6 +94,7 @@ const pathUpdated = (filePath: string) => {
   updatedPaths.add(filePath.split(path.sep).join(path.posix.sep))
   clearTimeout(reloadFsTimer)
   reloadFsTimer = setTimeout(async () => {
+    console.log(' ')
     console.log('Updated:', [...updatedPaths].map(p => '\n  ' + p).join(''))
     console.log('Rebuilding site...')
 

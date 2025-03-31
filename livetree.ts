@@ -43,6 +43,7 @@ export class LiveTree {
   }
 
   addDep(requiredBy: string, requiring: string) {
+    console.log('adddep', [requiredBy, requiring])
     let list = this.#deps.get(requiring)
     if (!list) this.#deps.set(requiring, list = new Set())
     list.add(requiredBy)
@@ -51,6 +52,8 @@ export class LiveTree {
   pathsUpdated(...paths: string[]) {
     this.updates++
     const filepaths = paths.map(p => p.slice(this.root.length))
+
+    console.log(filepaths)
 
     for (const filepath of filepaths) {
       if (fs.existsSync(this.realPathFor(filepath))) {
