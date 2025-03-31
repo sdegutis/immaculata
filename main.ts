@@ -51,15 +51,11 @@ registerHooks({
 
       if (tsx || jsx) {
         const toRoot = relative(dirname(url), siteBase) || '.'
-
-        const output = swc.transformSync(
-          found.content.toString(),
-          swcopts(tsx, toRoot))
-
+        const output = transform(found.content.toString(), tsx, toRoot)
         return {
           format: 'module',
           shortCircuit: true,
-          source: output.code,
+          source: output,
         }
       }
 
@@ -85,8 +81,8 @@ await import('./site/test1.tsx')
 
 
 
-function swcopts(tsx: boolean, toRoot: string): swc.Options {
-  return {
+function transform(src: string, tsx: boolean, importSourceSiteBase: string) {
+  return swc.transformSync(src, {
     isModule: true,
     jsc: {
       parser: tsx
@@ -95,9 +91,9 @@ function swcopts(tsx: boolean, toRoot: string): swc.Options {
       transform: {
         react: {
           runtime: 'automatic',
-          importSource: toRoot,
+          importSource: importSourceSiteBase,
         },
       },
     },
-  }
+  }).code
 }
