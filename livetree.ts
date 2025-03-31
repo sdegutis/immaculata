@@ -2,9 +2,12 @@ import * as swc from '@swc/core'
 import * as chokidar from 'chokidar'
 import { randomUUID } from 'crypto'
 import * as fs from "fs"
-import { registerHooks } from 'module'
+import { createRequire, registerHooks } from 'module'
 import * as posix from "path/posix"
 import { dirname, relative } from "path/posix"
+import { fileURLToPath } from 'url'
+
+const requireCache = createRequire('/').cache
 
 declare module "module" {
   export function registerHooks(opts: {
@@ -62,7 +65,13 @@ export class LiveTree {
   #createFile(path: string) {
     const content = fs.readFileSync(this.#realPathFor(path))
     const version = Date.now()
+    this.#deleteFromCache(path)
     this.files.set(path, { path, content, version })
+  }
+
+  #deleteFromCache(path: string) {
+    const key = fileURLToPath(this.base + path)
+    delete requireCache[key]
   }
 
   #realPathFor(filepath: string) {
@@ -103,6 +112,7 @@ export class LiveTree {
         for (const dep of requiredBy) {
           const file = this.files.get(dep)!
           file.version = Date.now()
+          this.#deleteFromCache(dep)
           this.#resetDepTree(dep, seen)
         }
       }
