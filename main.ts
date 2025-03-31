@@ -15,23 +15,25 @@ function processSite() {
   const start = Date.now()
   const map = tree.processFiles(files => {
     // files = files.filter(f => !f.path.endsWith('x'))
-    console.log('in here1')
+    // console.log('in here1')
 
     files = files.flatMap(f => immaculata.processFile(tree, f))
 
     // require('./site/test1.tsx')
-    console.log('in here2')
+    // console.log('in here2')
     return files
   })
-  console.log(`Time: ${Date.now() - start} ms`)
+  // console.log(`Time: ${Date.now() - start} ms`)
   server.files = map
   immaculata.generateFiles(map, true)
 }
 
 tree.watch({}, async (paths) => {
+  console.log(' ')
   console.log('paths changed', paths)
   processSite()
   server.reload()
 })
 
+console.log(' ')
 console.log('in main')
