@@ -1,3 +1,3 @@
 export const asdf = <bar />
 
-console.log('in test 2')
+console.log('in test2')

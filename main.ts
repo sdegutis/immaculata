@@ -54,8 +54,6 @@ registerHooks({
       const path = url.slice(siteBase.length)
       const found = tree.files.get(path)
 
-      // console.log([path])
-
       const tsx = path.endsWith('.tsx')
       const jsx = path.endsWith('.jsx')
 
@@ -90,7 +88,7 @@ let reloadFsTimer: NodeJS.Timeout
 const pathUpdated = (filePath: string) => {
   updatedPaths.add(filePath.split(path.sep).join(path.posix.sep))
   clearTimeout(reloadFsTimer)
-  reloadFsTimer = setTimeout(() => {
+  reloadFsTimer = setTimeout(async () => {
     console.log('Updated:', [...updatedPaths].map(p => '\n  ' + p).join(''))
     console.log('Rebuilding site...')
 
@@ -100,9 +98,9 @@ const pathUpdated = (filePath: string) => {
       // const outfiles = runtime.process()
       // server.files = outfiles
 
-      import('./site/test1.tsx').then(mod => {
-        console.log(mod.foo)
-      })
+      await import('./site/test1.tsx')
+      await import('./site/test1.tsx')
+      await import('./site/test1.tsx')
 
       updatedPaths.clear()
       // server.events.dispatchEvent(new Event('rebuilt'))
