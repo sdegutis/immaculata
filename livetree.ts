@@ -70,6 +70,8 @@ export class LiveTree {
   }
 
   #addDep(requiredBy: string, requiring: string) {
+    if (requiredBy === '/noop.js') return // lol
+
     let list = this.#deps.get(requiring)
     if (!list) this.#deps.set(requiring, list = new Set())
     list.add(requiredBy)
