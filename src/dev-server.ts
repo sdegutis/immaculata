@@ -1,74 +1,19 @@
-import * as chokidar from 'chokidar'
 import * as http from "http"
 import * as mimetypes from 'mime-types'
 import * as path from 'path'
-import { Runtime } from './runtime.ts'
 
-export function startDevServer(runtime: Runtime, config?: {
-  port?: number,
-  ignore?: (path: string) => boolean,
-  hmrPath?: string,
-}) {
-  const server = new Server()
-  server.startServer(config?.port ?? 8080, config?.hmrPath)
-
-  server.handlers = runtime.handlers
-
-  const outfiles = runtime.process()
-  server.files = outfiles
-
-  const updatedPaths = new Set<string>()
-  let reloadFsTimer: NodeJS.Timeout
-
-  const pathUpdated = (filePath: string) => {
-    updatedPaths.add(filePath.split(path.sep).join(path.posix.sep))
-    clearTimeout(reloadFsTimer)
-    reloadFsTimer = setTimeout(() => {
-      console.log('Updated:', [...updatedPaths].map(p => '\n  ' + p).join(''))
-      console.log('Rebuilding site...')
-
-      try {
-        runtime.pathsUpdated(...updatedPaths)
-
-        const outfiles = runtime.process()
-        server.files = outfiles
-
-        updatedPaths.clear()
-        server.events.dispatchEvent(new Event('rebuilt'))
-      }
-      catch (e) {
-        console.error(e)
-      }
-
-      console.log('Done.')
-    }, 100)
-  }
-
-  const opts: chokidar.ChokidarOptions = {
-    ignoreInitial: true,
-    cwd: process.cwd(),
-  }
-
-  if (config?.ignore) opts.ignored = config.ignore;
-
-  (chokidar.watch(runtime.siteDir, opts)
-    .on('add', pathUpdated)
-    .on('change', pathUpdated)
-    .on('unlink', pathUpdated))
-}
-
-class Server {
+export class DevServer {
 
   files: Map<string, Uint8Array | string> | undefined
   handlers?: Map<string, (body: string) => string> | undefined
 
-  events = new EventTarget();
-
+  #events = new EventTarget();
   #reloadables = new Set<http.ServerResponse>()
+  reload = () => this.#events.dispatchEvent(new Event('reload'))
 
-  startServer(port: number, hmrPath?: string) {
+  constructor(port: number, hmrPath?: string) {
     if (hmrPath) {
-      this.events.addEventListener('rebuilt', () => {
+      this.#events.addEventListener('reload', () => {
         for (const client of this.#reloadables) {
           console.log('Notifying SSE connection')
           client.write('data: {}\n\n')
@@ -100,7 +45,7 @@ class Server {
           })
           req.on('end', () => {
             let redirect: string
-            this.events.addEventListener('rebuilt', () => {
+            this.#events.addEventListener('reload', () => {
               res.statusCode = 302
               res.setHeader('Location', redirect)
               res.end()
