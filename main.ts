@@ -15,18 +15,29 @@ registerHooks({
 
   resolve: (url, context, next) => {
     const path = new URL(url, context.parentURL).href
+
     if (path.startsWith(siteBase)) {
+
+      if (context.parentURL.startsWith(siteBase)) {
+        const depending = context.parentURL.slice(siteBase.length)
+        const depended = path.slice(siteBase.length)
+        tree.addDep(depending, depended)
+      }
+
       const rel = '/' + relative(siteBase, path)
       const found = (
         tree.files.get(rel) ??
         tree.files.get(rel + '.ts') ??
         tree.files.get(rel + '.tsx') ??
         tree.files.get(rel + '.js'))
+
       return {
         url: new URL('.' + found.path, siteBase + '/').href,
         shortCircuit: true,
       }
+
     }
+
     return next(url, context)
   },
 
@@ -34,12 +45,14 @@ registerHooks({
     if (url.startsWith(siteBase)) {
       const path = url.slice(siteBase.length)
       const found = tree.files.get(path)
+
       return {
         format: path.match(/\.tsx?$/) ? 'module-typescript' : 'module',
         shortCircuit: true,
         source: found.content,
       }
     }
+
     return next(url, context)
   }
 
