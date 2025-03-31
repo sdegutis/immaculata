@@ -4,12 +4,14 @@ import { join } from "path/posix"
 export class LiveTree {
 
   root: string
+  base: string
 
   files = new Map<string, { path: string, content: Buffer, version: number }>();
   #deps = new Map<string, Set<string>>();
 
   constructor(root: string, importMetaUrl: string) {
     this.root = root
+    this.base = new URL(this.root, import.meta.url).href
     this.#loadDir('/')
   }
 

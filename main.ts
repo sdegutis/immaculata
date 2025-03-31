@@ -7,8 +7,6 @@ import { LiveTree } from "./livetree.ts"
 
 const tree = new LiveTree('site', import.meta.url)
 
-const siteBase = new URL(tree.root, import.meta.url).href
-
 
 
 
@@ -17,15 +15,15 @@ registerHooks({
   resolve: (url, context, next) => {
     let path = new URL(url, context.parentURL).href
 
-    if (path.startsWith(siteBase)) {
+    if (path.startsWith(tree.base)) {
 
-      if (context.parentURL?.startsWith(siteBase)) {
-        const depending = context.parentURL.slice(siteBase.length).replace(/\?ver=\d+$/, '')
-        const depended = path.slice(siteBase.length)
+      if (context.parentURL?.startsWith(tree.base)) {
+        const depending = context.parentURL.slice(tree.base.length).replace(/\?ver=\d+$/, '')
+        const depended = path.slice(tree.base.length)
         tree.addDep(depending, depended)
       }
 
-      const rel = '/' + relative(siteBase, path)
+      const rel = '/' + relative(tree.base, path)
       const found = (
         tree.files.get(rel) ??
         tree.files.get(rel + '.ts') ??
@@ -36,7 +34,7 @@ registerHooks({
         return next(url, context)
       }
 
-      const newurl = new URL('.' + found.path, siteBase + '/')
+      const newurl = new URL('.' + found.path, tree.base + '/')
       newurl.search = `ver=${found.version}`
 
       return {
@@ -50,10 +48,10 @@ registerHooks({
   },
 
   load: (url, context, next) => {
-    if (url.startsWith(siteBase)) {
+    if (url.startsWith(tree.base)) {
       url = url.replace(/\?ver=\d+$/, '')
 
-      const path = url.slice(siteBase.length)
+      const path = url.slice(tree.base.length)
       const found = tree.files.get(path)
 
       if (!found) {
@@ -64,7 +62,7 @@ registerHooks({
       const jsx = path.endsWith('.jsx')
 
       if (tsx || jsx) {
-        const toRoot = relative(dirname(url), siteBase) || '.'
+        const toRoot = relative(dirname(url), tree.base) || '.'
         const output = transform(found.content.toString(), tsx, toRoot)
         return {
           format: 'module',
