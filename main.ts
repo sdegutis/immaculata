@@ -7,10 +7,12 @@ const tree = new immaculata.LiveTree('site', import.meta.url)
 processSite()
 
 function processSite() {
+  const start = Date.now()
   const map = tree.processFiles(files => {
     files = files.filter(f => !f.path.endsWith('x'))
     return files
   })
+  console.log(`Time: ${Date.now() - start} ms`)
   server.files = map
   immaculata.generateFiles(map, true)
 }
