@@ -136,7 +136,6 @@ export class LiveTree {
 
       resolve: (url, context, next) => {
         if (!url.match(/^[./]/)) {
-          console.log(url, /^[./]/.test(url))
           return next(url, context)
         }
 
