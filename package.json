@@ -17,7 +17,7 @@
   "bugs": {
     "url": "https://github.com/sdegutis/immaculata.dev/issues"
   },
-  "homepage": "https://github.com/sdegutis/immaculata.dev#readme",
+  "homepage": "https://immaculata.dev",
   "dependencies": {
     "@swc/core": "^1.11.13",
     "chokidar": "^4.0.3",
