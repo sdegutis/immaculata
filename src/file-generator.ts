@@ -1,16 +1,13 @@
 import * as fs from 'fs'
 import * as path from 'path/posix'
-import { Runtime } from './runtime.ts'
 
-export function generateFiles(runtime: Runtime) {
-  const out = runtime.process()!
-
+export function generateFiles(out: Map<string, Uint8Array<ArrayBufferLike> | string>, dry = false) {
   const madeDirs = new Set<string>()
   const mkdirIfNeeded = (dir: string) => {
     if (madeDirs.has(dir)) return
     madeDirs.add(dir)
     console.log('mkdir', dir)
-    fs.mkdirSync(dir)
+    if (!dry) fs.mkdirSync(dir)
   }
 
   for (const [filepath, content] of out) {
@@ -22,6 +19,6 @@ export function generateFiles(runtime: Runtime) {
     }
 
     console.log('writefile', newFilepath)
-    fs.writeFileSync(newFilepath, content)
+    if (!dry) fs.writeFileSync(newFilepath, content)
   }
 }
