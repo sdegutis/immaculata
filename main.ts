@@ -99,8 +99,9 @@ await import('./site/test1.tsx')
 
 
 
-function transform(src: string, tsx: boolean, importSourceSiteBase: string) {
-  return swc.transformSync(src, {
+function transform(src: string, tsx: boolean, treeRoot: string) {
+  console.log(treeRoot)
+  const result = swc.transformSync(src, {
     isModule: true,
     jsc: {
       parser: tsx
@@ -109,9 +110,10 @@ function transform(src: string, tsx: boolean, importSourceSiteBase: string) {
       transform: {
         react: {
           runtime: 'automatic',
-          importSource: importSourceSiteBase,
+          importSource: treeRoot + '/bar/qux',
         },
       },
     },
-  }).code
+  })
+  return result.code
 }
