@@ -6,7 +6,6 @@ import { dirname, relative } from "path/posix"
 import { LiveTree } from "./livetree.ts"
 
 const tree = new LiveTree('site', import.meta.url)
-tree.loadTree()
 
 const siteBase = new URL(tree.root, import.meta.url).href
 

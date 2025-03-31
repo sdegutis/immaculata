@@ -10,9 +10,6 @@ export class LiveTree {
 
   constructor(root: string, importMetaUrl: string) {
     this.root = root
-  }
-
-  loadTree() {
     this.#loadDir('/')
   }
 
