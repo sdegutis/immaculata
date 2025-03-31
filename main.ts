@@ -1,5 +1,5 @@
 import * as swc from '@swc/core'
-import { type LoadFnOutput, registerHooks } from 'module'
+import { registerHooks } from 'module'
 import { dirname, relative } from "path/posix"
 import { LiveTree } from "./livetree.ts"
 
@@ -46,6 +46,23 @@ registerHooks({
       const path = url.slice(siteBase.length)
       const found = tree.files.get(path)
 
+      const tsx = path.endsWith('.tsx')
+      const jsx = path.endsWith('.jsx')
+
+      if (tsx || jsx) {
+        const toRoot = relative(dirname(url), siteBase) || '.'
+
+        const output = swc.transformSync(
+          found.content.toString(),
+          swcopts(tsx, toRoot))
+
+        return {
+          format: 'module',
+          shortCircuit: true,
+          source: output.code,
+        }
+      }
+
       return {
         format: path.match(/\.tsx?$/) ? 'module-typescript' : 'module',
         shortCircuit: true,
@@ -58,31 +75,7 @@ registerHooks({
 
 })
 
-registerHooks({
 
-  load: (url, context, next) => {
-    const tsx = url.endsWith('.tsx')
-    const jsx = url.endsWith('.jsx')
-
-    if (tsx || jsx) {
-      const found = next(url, context) as LoadFnOutput
-      const toRoot = relative(dirname(url), siteBase) || '.'
-
-      const output = swc.transformSync(
-        found.source.toString(),
-        swcopts(tsx, toRoot))
-
-      return {
-        format: 'module',
-        shortCircuit: true,
-        source: output.code,
-      }
-    }
-
-    return next(url, context)
-  }
-
-})
 
 console.log('in main')
 
