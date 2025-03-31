@@ -5,6 +5,13 @@ import { registerHooks } from 'module'
 import * as posix from "path/posix"
 import { dirname, relative } from "path/posix"
 
+declare module "module" {
+  export function registerHooks(opts: {
+    load?: LoadHook,
+    resolve?: ResolveHook,
+  }): void
+}
+
 export type JsxTransformer = (
   filename: string,
   src: string,
