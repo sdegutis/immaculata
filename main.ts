@@ -1,24 +1,23 @@
 import * as immaculata from "immaculata"
 
+const server = new immaculata.DevServer(8080, '/hmr')
+
 const tree = new immaculata.LiveTree('site', import.meta.url)
 
-const tsx = immaculata.makeSwcTransformJsx(() => 'immaculata/src/jsx-strings.ts')
-// const tsx = immaculata.makeSwcTransformJsx(root => root + '/jsx-runtime.ts')
+function processSite() {
 
-tree.enableModules(tsx)
+  const files = tree.files.values().toArray()
+
+  const map = new Map(files.map(f => [f.path, f.content]))
+
+  server.files = map
+
+}
 
 tree.watch({}, async (paths) => {
   console.log('paths changed', paths)
-
-
-  await import('./site/test1.tsx')
-  await import('./site/test1.tsx')
-  await import('./site/test1.tsx')
-
+  server.reload()
+  processSite()
 })
 
 console.log('in main')
-
-await import('./site/test1.tsx')
-await import('./site/test1.tsx')
-await import('./site/test1.tsx')
