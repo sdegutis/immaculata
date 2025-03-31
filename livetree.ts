@@ -201,24 +201,28 @@ export class LiveTree {
 
 }
 
-function swcTransformJsx(filename: string, src: string, tsx: boolean, treeRoot: string) {
-  const result = swc.transformSync(src, {
-    filename,
-    isModule: true,
-    sourceMaps: 'inline',
-    jsc: {
-      keepClassNames: true,
-      target: 'esnext',
-      parser: tsx
-        ? { syntax: 'typescript', tsx: true, decorators: true }
-        : { syntax: 'ecmascript', jsx: true, decorators: true },
-      transform: {
-        react: {
-          runtime: 'automatic',
-          importSource: treeRoot,
+const swcTransformJsx = makeSwcTransformJsx((...[, , , treeRoot]) => treeRoot)
+
+export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTransformer>) => string): JsxTransformer {
+  return (filename, src, tsx, treeRoot) => {
+    const result = swc.transformSync(src, {
+      filename,
+      isModule: true,
+      sourceMaps: 'inline',
+      jsc: {
+        keepClassNames: true,
+        target: 'esnext',
+        parser: tsx
+          ? { syntax: 'typescript', tsx: true, decorators: true }
+          : { syntax: 'ecmascript', jsx: true, decorators: true },
+        transform: {
+          react: {
+            runtime: 'automatic',
+            importSource: jsxImportSource(filename, src, tsx, treeRoot),
+          },
         },
       },
-    },
-  })
-  return result.code
+    })
+    return result.code
+  }
 }
