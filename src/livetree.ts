@@ -61,7 +61,7 @@ export class LiveTree {
     return posix.join(this.root, filepath)
   }
 
-  addDep(requiredBy: string, requiring: string) {
+  #addDep(requiredBy: string, requiring: string) {
     let list = this.#deps.get(requiring)
     if (!list) this.#deps.set(requiring, list = new Set())
     list.add(requiredBy)
@@ -146,7 +146,7 @@ export class LiveTree {
           if (context.parentURL?.startsWith(this.base)) {
             const depending = context.parentURL.slice(this.base.length).replace(/\?ver=\d+$/, '')
             const depended = path.slice(this.base.length)
-            this.addDep(depending, depended)
+            this.#addDep(depending, depended)
           }
 
           const rel = '/' + relative(this.base, path)
