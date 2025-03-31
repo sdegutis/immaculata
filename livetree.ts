@@ -207,6 +207,8 @@ function swcTransformJsx(filename: string, src: string, tsx: boolean, treeRoot: 
     isModule: true,
     sourceMaps: 'inline',
     jsc: {
+      keepClassNames: true,
+      target: 'esnext',
       parser: tsx
         ? { syntax: 'typescript', tsx: true, decorators: true }
         : { syntax: 'ecmascript', jsx: true, decorators: true },
