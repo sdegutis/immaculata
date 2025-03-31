@@ -44,7 +44,7 @@ export function startDevServer(runtime: Runtime, config?: {
     }, 100)
   }
 
-  const opts: chokidar.WatchOptions = {
+  const opts: chokidar.ChokidarOptions = {
     ignoreInitial: true,
     cwd: process.cwd(),
   }
