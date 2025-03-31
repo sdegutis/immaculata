@@ -4,7 +4,12 @@ import * as fs from "fs"
 import { registerHooks } from 'module'
 import posix, { dirname, relative } from "path/posix"
 
-export type JsxTransformer = (src: string, tsx: boolean, treeRoot: string) => string
+export type JsxTransformer = (
+  filename: string,
+  src: string,
+  tsx: boolean,
+  treeRoot: string
+) => string
 
 export class LiveTree {
 
@@ -171,7 +176,8 @@ export class LiveTree {
 
           if (tsx || jsx) {
             const toRoot = relative(dirname(url), this.base) || '.'
-            const output = transformJsx(found.content.toString(), tsx, toRoot)
+            const src = found.content.toString()
+            const output = transformJsx(url, src, tsx, toRoot)
             return {
               format: 'module',
               shortCircuit: true,
@@ -195,9 +201,11 @@ export class LiveTree {
 
 }
 
-function swcTransformJsx(src: string, tsx: boolean, treeRoot: string) {
+function swcTransformJsx(filename: string, src: string, tsx: boolean, treeRoot: string) {
   const result = swc.transformSync(src, {
+    filename,
     isModule: true,
+    sourceMaps: 'inline',
     jsc: {
       parser: tsx
         ? { syntax: 'typescript', tsx: true, decorators: true }
