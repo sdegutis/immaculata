@@ -149,36 +149,34 @@ export class LiveTree {
 
         let path = new URL(url, context.parentURL).href
 
-        if (path.startsWith(this.base)) {
-
-          if (context.parentURL?.startsWith(this.base)) {
-            const depending = context.parentURL.slice(this.base.length).replace(/\?ver=\d+$/, '')
-            const depended = path.slice(this.base.length)
-            this.#addDep(depending, depended)
-          }
-
-          const rel = '/' + relative(this.base, path)
-          const found = (
-            this.files.get(rel) ??
-            this.files.get(rel + '.ts') ??
-            this.files.get(rel + '.tsx') ??
-            this.files.get(rel + '.jsx'))
-
-          if (!found) {
-            return next(url, context)
-          }
-
-          const newurl = new URL('.' + found.path, this.base + '/')
-          newurl.search = `ver=${found.version}`
-
-          return {
-            url: newurl.href,
-            shortCircuit: true,
-          }
-
+        if (!path.startsWith(this.base)) {
+          return next(url, context)
         }
 
-        return next(url, context)
+        if (context.parentURL?.startsWith(this.base)) {
+          const depending = context.parentURL.slice(this.base.length).replace(/\?ver=\d+$/, '')
+          const depended = path.slice(this.base.length)
+          this.#addDep(depending, depended)
+        }
+
+        const rel = '/' + relative(this.base, path)
+        const found = (
+          this.files.get(rel) ??
+          this.files.get(rel + '.ts') ??
+          this.files.get(rel + '.tsx') ??
+          this.files.get(rel + '.jsx'))
+
+        if (!found) {
+          return next(url, context)
+        }
+
+        const newurl = new URL('.' + found.path, this.base + '/')
+        newurl.search = `ver=${found.version}`
+
+        return {
+          url: newurl.href,
+          shortCircuit: true,
+        }
       },
 
       load: (url, context, next) => {
