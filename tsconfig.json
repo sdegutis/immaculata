@@ -7,7 +7,7 @@
     "declaration": true,
     "verbatimModuleSyntax": true,
     "allowSyntheticDefaultImports": false,
-    "rootDir": "src",
+    "rootDir": ".",
     "moduleResolution": "nodenext",
     "sourceMap": false,
     "noEmit": true,
