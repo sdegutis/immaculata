@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "@types/node": "^22.13.14"
+  },
+  "type": "module",
+  "dependencies": {
+    "@swc/core": "^1.11.13"
+  }
+}
