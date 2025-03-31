@@ -1,5 +1,6 @@
 import * as swc from '@swc/core'
 import * as chokidar from 'chokidar'
+import { randomUUID } from 'crypto'
 import * as fs from "fs"
 import { registerHooks } from 'module'
 import * as posix from "path/posix"
@@ -217,6 +218,7 @@ export class LiveTree {
 const defaultSwcTransformJsx = makeSwcTransformJsx(treeRoot => treeRoot)
 
 export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTransformer>) => string): JsxTransformer {
+  const uuid = randomUUID()
   return (treeRoot, filename, src, tsx) => {
     const result = swc.transformSync(src, {
       filename,
@@ -231,11 +233,11 @@ export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTra
         transform: {
           react: {
             runtime: 'automatic',
-            importSource: jsxImportSource(treeRoot, filename, src, tsx),
+            importSource: uuid,
           },
         },
       },
     })
-    return result.code
+    return result.code.replace(uuid + '/jsx-runtime', jsxImportSource(treeRoot, filename, src, tsx))
   }
 }
