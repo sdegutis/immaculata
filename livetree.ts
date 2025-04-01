@@ -1,6 +1,4 @@
-import * as swc from '@swc/core'
 import * as chokidar from 'chokidar'
-import { randomUUID } from 'crypto'
 import * as fs from "fs"
 import { createRequire, registerHooks } from 'module'
 import * as posix from "path/posix"
@@ -148,7 +146,7 @@ export class LiveTree {
       .on('unlink', pathUpdated)
   }
 
-  enableModules(transformJsx: JsxTransformer = defaultSwcTransformJsx) {
+  enableModules(transformJsx?: JsxTransformer) {
 
     registerHooks({
 
@@ -203,7 +201,7 @@ export class LiveTree {
           const tsx = path.endsWith('.tsx')
           const jsx = path.endsWith('.jsx')
 
-          if (tsx || jsx) {
+          if (transformJsx && (tsx || jsx)) {
             const toRoot = relative(dirname(url), this.base) || '.'
             const src = found.content.toString()
             const output = transformJsx(toRoot, url, src, tsx)
@@ -228,33 +226,4 @@ export class LiveTree {
 
   }
 
-}
-
-const defaultSwcTransformJsx = makeSwcTransformJsx(treeRoot => treeRoot + '/jsx-node.ts')
-
-export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTransformer>) => string): JsxTransformer {
-  const uuid = randomUUID()
-  return (treeRoot, filename, src, tsx) => {
-    const result = swc.transformSync(src, {
-      filename,
-      isModule: true,
-      sourceMaps: 'inline',
-      jsc: {
-        keepClassNames: true,
-        target: 'esnext',
-        parser: tsx
-          ? { syntax: 'typescript', tsx: true, decorators: true }
-          : { syntax: 'ecmascript', jsx: true, decorators: true },
-        transform: {
-          react: {
-            runtime: 'automatic',
-            importSource: uuid,
-          },
-        },
-      },
-    })
-    const oldJsxImport = `${uuid}/jsx-runtime`
-    const newJsxImport = jsxImportSource(treeRoot, filename, src, tsx)
-    return result.code.replace(oldJsxImport, newJsxImport)
-  }
 }
