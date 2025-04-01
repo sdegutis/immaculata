@@ -6,6 +6,7 @@
   "type": "module",
   "dependencies": {
     "@swc/core": "^1.11.13",
-    "chokidar": "^4.0.3"
+    "chokidar": "^4.0.3",
+    "immaculata": "^0.1.1"
   }
 }
