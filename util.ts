@@ -29,4 +29,4 @@ export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTra
   }
 }
 
-const defaultSwcTransformJsx = makeSwcTransformJsx(treeRoot => treeRoot + '/jsx-node.ts')
+export const defaultSwcTransformJsx = makeSwcTransformJsx(treeRoot => treeRoot + '/jsx-node.ts')
