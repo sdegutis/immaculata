@@ -22,8 +22,16 @@ async function processSite() {
     // files = files.filter(f => !f.path.endsWith('x'))
     // console.log('in here1')
 
-    const dynamicFiles = files.map(file => ({ file, match: file.path.match(isDynamicFile) }))
-    const dynamicArrayFiles = files.map(file => ({ file, match: file.path.match(isDynamicArrayFile) }))
+    const groups = Object.groupBy(files.map((file): { type: 'dynamic' | 'dynamicArray' | 'regular', file: immaculata.LiveFile } => {
+      let match
+      if (match = file.path.match(isDynamicFile)) return { type: 'dynamic', file }
+      if (match = file.path.match(isDynamicArrayFile)) return { type: 'dynamicArray', file }
+      return { type: 'regular', file }
+    }), it => it.type)
+
+    const dynamicFiles = groups.dynamic?.map(g => g.file)
+    const dynamicArrayFiles = groups.dynamicArray?.map(g => g.file)
+    const regularFiles = groups.regular?.map(g => g.file)
 
     // files = files.flatMap(f => processFile(tree, f))
 
