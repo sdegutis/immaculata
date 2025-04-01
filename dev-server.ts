@@ -4,7 +4,7 @@ import * as path from 'path'
 
 export class DevServer {
 
-  files: Map<string, Uint8Array | string> | undefined
+  files: Map<string, Buffer | string> | undefined
   handlers?: Map<string, (body: string) => string> | undefined
 
   #events = new EventTarget();
@@ -39,7 +39,7 @@ export class DevServer {
       if (req.method === 'POST') {
         const handler = this.handlers?.get(url)
         if (handler) {
-          const data: Uint8Array[] = []
+          const data: Buffer[] = []
           req.on('data', (chunk) => {
             data.push(chunk)
           })

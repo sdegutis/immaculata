@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path/posix'
 
-export function generateFiles(out: Map<string, Uint8Array<ArrayBufferLike> | string>, dry = false) {
+export function generateFiles(out: Map<string, Buffer | string>, dry = false) {
   const madeDirs = new Set<string>()
   const mkdirIfNeeded = (dir: string) => {
     if (madeDirs.has(dir)) return
