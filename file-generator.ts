@@ -6,7 +6,7 @@ import * as path from 'path/posix'
  * 
  * `outDir` defaults to `docs` for GH Pages compatibility.
  */
-export function generateFiles(out: Map<string, Buffer | string>, outDir = 'docs', dry = false) {
+export function generateFiles(out: Map<string, Buffer | string>, dry = false, outDir = 'docs') {
   const madeDirs = new Set<string>()
   const mkdirIfNeeded = (dir: string) => {
     if (madeDirs.has(dir)) return
