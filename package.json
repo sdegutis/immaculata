@@ -9,13 +9,13 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sdegutis/immaculata.dev.git"
+    "url": "git+https://github.com/thesoftwarephilosopher/immaculata.dev.git"
   },
   "keywords": [ ],
-  "author": "Steven Degutis",
+  "author": "@thesoftwarephilosopher",
   "description": "Simple TypeScript/JSX SSG",
   "bugs": {
-    "url": "https://github.com/sdegutis/immaculata.dev/issues"
+    "url": "https://github.com/thesoftwarephilosopher/immaculata.dev/issues"
   },
   "homepage": "https://immaculata.dev",
   "dependencies": {
