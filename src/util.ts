@@ -1,6 +1,6 @@
 import * as swc from '@swc/core'
 import { randomUUID } from "crypto"
-import type { JsxTransformer } from "./livetree.ts"
+import type { JsxTransformer } from "./livetree.js"
 
 export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTransformer>) => string): JsxTransformer {
   const uuid = randomUUID()
@@ -30,4 +30,4 @@ export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTra
 }
 
 export const transformJsxToRootJsx = makeSwcTransformJsx(treeRoot => treeRoot + '/jsx-node.ts')
-export const transformJsxToStrings = makeSwcTransformJsx(() => 'immaculata/jsx-strings.ts')
+export const transformJsxToStrings = makeSwcTransformJsx(() => 'immaculata/dist/jsx-strings.js')
