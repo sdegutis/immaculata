@@ -4,17 +4,17 @@ import * as path from 'path'
 
 export class DevServer {
 
-  files: Map<string, Buffer | string> | undefined
-  handlers?: Map<string, (body: string) => string> | undefined
+  public files: Map<string, Buffer | string> | undefined
+  public handlers?: Map<string, (body: string) => string> | undefined
 
-  #events = new EventTarget();
-  #reloadables = new Set<http.ServerResponse>()
-  reload = () => this.#events.dispatchEvent(new Event('reload'))
+  public reload = () => this.events.dispatchEvent(new Event('reload'))
+  private events = new EventTarget();
+  private reloadables = new Set<http.ServerResponse>()
 
-  constructor(port: number, hmrPath?: string) {
+  public constructor(port: number, hmrPath?: string) {
     if (hmrPath) {
-      this.#events.addEventListener('reload', () => {
-        for (const client of this.#reloadables) {
+      this.events.addEventListener('reload', () => {
+        for (const client of this.reloadables) {
           console.log('Notifying SSE connection')
           client.write('data: {}\n\n')
         }
@@ -26,13 +26,13 @@ export class DevServer {
 
       if (url === hmrPath) {
         res.once('close', () => {
-          this.#reloadables.delete(res)
+          this.reloadables.delete(res)
         })
         res.setHeader('connection', 'keep-alive')
         res.setHeader('content-type', 'text/event-stream')
         res.setHeader('cache-control', 'no-cache')
         res.flushHeaders()
-        this.#reloadables.add(res)
+        this.reloadables.add(res)
         return
       }
 
@@ -45,7 +45,7 @@ export class DevServer {
           })
           req.on('end', () => {
             let redirect: string
-            this.#events.addEventListener('reload', () => {
+            this.events.addEventListener('reload', () => {
               res.statusCode = 302
               res.setHeader('Location', redirect)
               res.end()

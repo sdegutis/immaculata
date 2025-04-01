@@ -25,69 +25,69 @@ export type LiveFile = { path: string, content: string | Buffer }
 
 export class LiveTree {
 
-  root: string
-  base: string
+  public root: string
+  public base: string
 
-  files = new Map<string, { path: string, content: Buffer, version: number }>();
-  #deps = new Map<string, Set<string>>();
+  public files = new Map<string, { path: string, content: Buffer, version: number }>();
+  private deps = new Map<string, Set<string>>();
 
-  constructor(root: string, importMetaUrl: string) {
+  public constructor(root: string, importMetaUrl: string) {
     this.root = root
     this.base = new URL(this.root, importMetaUrl).href
-    this.#loadDir('/')
+    this.loadDir('/')
   }
 
-  processFiles(fn: (files: LiveFile[]) => LiveFile[]) {
+  public processFiles(fn: (files: LiveFile[]) => LiveFile[]) {
     let files: LiveFile[] = [...this.files.values()]
     files = fn(files)
     return new Map(files.map(f => [f.path, f.content]))
   }
 
-  #loadDir(base: string) {
-    const dirRealPath = this.#realPathFor(base)
+  private loadDir(base: string) {
+    const dirRealPath = this.realPathFor(base)
     const files = fs.readdirSync(dirRealPath)
     for (const name of files) {
       const realFilePath = posix.join(dirRealPath, name)
       const stat = fs.statSync(realFilePath)
 
       if (stat.isDirectory()) {
-        this.#loadDir(posix.join(base, name))
+        this.loadDir(posix.join(base, name))
       }
       else if (stat.isFile()) {
         const filepath = posix.join(base, name)
-        this.#createFile(filepath)
+        this.createFile(filepath)
       }
     }
   }
 
-  #createFile(path: string) {
-    const content = fs.readFileSync(this.#realPathFor(path))
+  private createFile(path: string) {
+    const content = fs.readFileSync(this.realPathFor(path))
     const version = Date.now()
-    this.#deleteFromCache(path)
+    this.deleteFromCache(path)
     this.files.set(path, { path, content, version })
   }
 
-  #deleteFromCache(path: string) {
+  private deleteFromCache(path: string) {
     const key = fileURLToPath(this.base + path)
     delete requireCache[key]
   }
 
-  #realPathFor(filepath: string) {
+  private realPathFor(filepath: string) {
     return posix.join(this.root, filepath)
   }
 
-  #addDep(requiredBy: string, requiring: string) {
-    let list = this.#deps.get(requiring)
-    if (!list) this.#deps.set(requiring, list = new Set())
+  private addDep(requiredBy: string, requiring: string) {
+    let list = this.deps.get(requiring)
+    if (!list) this.deps.set(requiring, list = new Set())
     list.add(requiredBy)
   }
 
-  #pathsUpdated(...paths: string[]) {
+  private pathsUpdated(...paths: string[]) {
     const filepaths = paths.map(p => p.slice(this.root.length))
 
     for (const filepath of filepaths) {
-      if (fs.existsSync(this.#realPathFor(filepath))) {
-        this.#createFile(filepath)
+      if (fs.existsSync(this.realPathFor(filepath))) {
+        this.createFile(filepath)
       }
       else {
         this.files.delete(filepath)
@@ -96,28 +96,28 @@ export class LiveTree {
 
     const resetSeen = new Set<string>()
     for (const filepath of filepaths) {
-      this.#resetDepTree(filepath, resetSeen)
+      this.resetDepTree(filepath, resetSeen)
     }
   }
 
-  #resetDepTree(path: string, seen: Set<string>) {
+  private resetDepTree(path: string, seen: Set<string>) {
     if (seen.has(path)) return
     seen.add(path)
 
-    for (const [requiring, requiredBy] of this.#deps) {
+    for (const [requiring, requiredBy] of this.deps) {
       if (path.startsWith(requiring)) {
-        this.#deps.delete(requiring)
+        this.deps.delete(requiring)
         for (const dep of requiredBy) {
           const file = this.files.get(dep)!
           file.version = Date.now()
-          this.#deleteFromCache(dep)
-          this.#resetDepTree(dep, seen)
+          this.deleteFromCache(dep)
+          this.resetDepTree(dep, seen)
         }
       }
     }
   }
 
-  watch(opts: chokidar.ChokidarOptions, onchange: (paths: Set<string>) => void) {
+  public watch(opts: chokidar.ChokidarOptions, onchange: (paths: Set<string>) => void) {
     const updatedPaths = new Set<string>()
     let reloadFsTimer: NodeJS.Timeout
 
@@ -126,7 +126,7 @@ export class LiveTree {
       clearTimeout(reloadFsTimer)
       reloadFsTimer = setTimeout(async () => {
         try {
-          this.#pathsUpdated(...updatedPaths)
+          this.pathsUpdated(...updatedPaths)
           onchange(updatedPaths)
           updatedPaths.clear()
         }
@@ -146,7 +146,7 @@ export class LiveTree {
       .on('unlink', pathUpdated)
   }
 
-  enableModules(transformJsx?: JsxTransformer) {
+  public enableModules(transformJsx?: JsxTransformer) {
 
     registerHooks({
 
@@ -164,7 +164,7 @@ export class LiveTree {
         if (context.parentURL?.startsWith(this.base) && !context.parentURL.endsWith('/noop.js')) {
           const depending = context.parentURL.slice(this.base.length).replace(/\?ver=\d+$/, '')
           const depended = path.slice(this.base.length)
-          this.#addDep(depending, depended)
+          this.addDep(depending, depended)
         }
 
         const rel = '/' + relative(this.base, path)
