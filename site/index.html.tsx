@@ -1,7 +1,10 @@
 export default <>
-  <script>{`new EventSource('/hmr').onmessage = () => location.reload()`}</script>
+  <script type="module">{`
+    import foo from "./script1.js"
+    console.log(foo)
+  `}</script>
 
   <body style="background-color: #111; color:#ccc">
-    <b>a3 world?</b>
+    <b>asdf world?</b>
   </body>
 </>
