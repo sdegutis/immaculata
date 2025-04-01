@@ -1,11 +1,8 @@
 import * as chokidar from 'chokidar'
 import * as fs from "fs"
-import { createRequire, registerHooks } from 'module'
+import { registerHooks } from 'module'
 import * as posix from "path/posix"
 import { dirname, relative } from "path/posix"
-import { fileURLToPath } from 'url'
-
-const requireCache = createRequire('/').cache
 
 declare module "module" {
   export function registerHooks(opts: {
@@ -68,8 +65,8 @@ export class LiveTree {
   }
 
   private deleteFromCache(path: string) {
-    const key = fileURLToPath(this.base + path)
-    delete requireCache[key]
+    // No way to do this yet
+    // See https://github.com/nodejs/node/issues/57696
   }
 
   private realPathFor(filepath: string) {
