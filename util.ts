@@ -29,4 +29,5 @@ export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTra
   }
 }
 
-export const defaultSwcTransformJsx = makeSwcTransformJsx(treeRoot => treeRoot + '/jsx-node.ts')
+export const transformJsxToRootJsx = makeSwcTransformJsx(treeRoot => treeRoot + '/jsx-node.ts')
+export const transformJsxToStrings = makeSwcTransformJsx(() => 'immaculata/jsx-strings.ts')
