@@ -18,7 +18,7 @@ export type JsxTransformer = (
   tsx: boolean,
 ) => string
 
-export type MemFile = { path: string, content: string | Buffer }
+export type MemFile = { path: string, content: Buffer }
 
 export class LiveTree {
 
