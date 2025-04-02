@@ -18,7 +18,7 @@ export type JsxTransformer = (
   tsx: boolean,
 ) => string
 
-export type LiveFile = { path: string, content: string | Buffer }
+export type MemFile = { path: string, content: string | Buffer }
 
 export class LiveTree {
 
@@ -34,8 +34,8 @@ export class LiveTree {
     this.loadDir('/')
   }
 
-  public async processFiles(fn: (files: LiveFile[]) => LiveFile[] | Promise<LiveFile[]>) {
-    let files: LiveFile[] = [...this.files.values().map(f => ({ ...f }))]
+  public async processFiles(fn: (files: MemFile[]) => MemFile[] | Promise<MemFile[]>) {
+    let files: MemFile[] = [...this.files.values().map(f => ({ ...f }))]
     files = await fn(files)
     return new Map(files.map(f => [f.path, f.content]))
   }
