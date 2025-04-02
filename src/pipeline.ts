@@ -69,8 +69,12 @@ export class Pipeline {
     }
   }
 
-  async do(fn: (file: MemFile) => void | Promise<void>) {
+  async doAsync(fn: (file: MemFile) => void | Promise<void>) {
     await Promise.all(this.all().map(fn))
+  }
+
+  do(fn: (file: MemFile) => void) {
+    this.all().map(fn)
   }
 
   paths() {
