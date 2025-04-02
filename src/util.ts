@@ -31,3 +31,35 @@ export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTra
 
 export const transformJsxToRootJsx = makeSwcTransformJsx(treeRoot => treeRoot + '/jsx-node.ts')
 export const transformJsxToStrings = makeSwcTransformJsx(() => 'immaculata/dist/jsx-strings.js')
+
+export function compileWithSwc(src: string, modifyOpts?: (opts: swc.Options) => void) {
+  const opts: swc.Options = {
+    isModule: true,
+    sourceMaps: 'inline',
+    jsc: {
+      keepClassNames: true,
+      target: 'esnext',
+      parser: { syntax: 'typescript', tsx: true, decorators: true },
+      transform: {
+        react: {
+          runtime: 'automatic',
+          importSource: '/jsx',
+        },
+      },
+    },
+  }
+  modifyOpts?.(opts)
+
+  let fixJsxImport
+  if (opts.jsc?.transform?.react?.importSource) {
+    const uuid = randomUUID()
+    const fakeImport = `${uuid}/jsx-runtime`
+    const realImport = opts.jsc.transform.react.importSource
+    opts.jsc.transform.react.importSource = uuid
+    fixJsxImport = (code: string) => code.replace(fakeImport, realImport)
+  }
+
+  const result = swc.transformSync(src, opts)
+  if (fixJsxImport) result.code = fixJsxImport(result.code)
+  return result.code
+}
