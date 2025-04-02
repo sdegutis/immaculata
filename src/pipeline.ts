@@ -34,7 +34,7 @@ export class Pipeline {
     this.#filters = filters
   }
 
-  get all() {
+  all() {
     return this.#real.filter(file => this.#matches(file))
   }
 
@@ -60,7 +60,8 @@ export class Pipeline {
   }
 
   remove() {
-    for (let i = this.#real.length - 1; i >= 0; i--) {
+    let i = this.#real.length
+    while (i--) {
       const file = this.#real[i]!
       if (this.#matches(file)) {
         this.#real.splice(i, 1)
@@ -69,15 +70,15 @@ export class Pipeline {
   }
 
   async do(fn: (file: MemFile) => void) {
-    this.all.forEach(fn)
+    this.all().forEach(fn)
   }
 
   paths() {
-    return this.all.map(f => f.path)
+    return this.all().map(f => f.path)
   }
 
   results() {
-    return new Map(this.all.map(f => [f.path, f.textOrContent()]))
+    return new Map(this.all().map(f => [f.path, f.textOrContent()]))
   }
 
 }
