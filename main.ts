@@ -1,47 +1,47 @@
 import * as immaculata from "immaculata"
-import { createRequire } from "module"
 
-immaculata.generateFiles
-
-const require = createRequire(import.meta.url)
-
-const server = new immaculata.DevServer(8080, '/hmr')
+const server = new immaculata.DevServer(8080)
 const tree = new immaculata.LiveTree('site', import.meta.url)
 
-tree.enableModules(immaculata.makeSwcTransformJsx(() => 'immaculata/jsx-strings.ts'))
-// tree.enableModules()
+tree.enableModules(immaculata.transformModuleJsxToStrings)
 
 processSite()
 
+
+
+
 async function processSite() {
-  const isDynamicArrayFile = /\/.*(?<slug>\[.+\]).*\..+(?<ext>\.tsx?)$/
-  const isDynamicFile = /\..+(?<ext>\.tsx?)$/
 
-  // const start = Date.now()
-  const map = await processFilesAsync(async files => {
-    // files = files.filter(f => !f.path.endsWith('x'))
-    // console.log('in here1')
+  const map = await tree.processFiles(async files => {
 
-    const groups = Object.groupBy(files.map((file): { type: 'dynamic' | 'dynamicArray' | 'regular', file: immaculata.LiveFile } => {
-      let match
-      if (match = file.path.match(isDynamicFile)) return { type: 'dynamic', file }
-      if (match = file.path.match(isDynamicArrayFile)) return { type: 'dynamicArray', file }
-      return { type: 'regular', file }
-    }), it => it.type)
+    const r = /\..+(?<ext>\.tsx?)$/
+    await files.with(r).doAsync(async (file) => {
+      const match = file.path.match(r)!
+      const exports = await import('./site' + file.path)
 
-    const dynamicFiles = groups.dynamic?.map(g => g.file)
-    const dynamicArrayFiles = groups.dynamicArray?.map(g => g.file)
-    const regularFiles = groups.regular?.map(g => g.file)
+      file.path = file.path.slice(0, -match.groups!["ext"]!.length)
+      file.text = exports.default
+      // console.log([file.path])
+    })
 
-    // files = files.flatMap(f => processFile(tree, f))
+    files.with('\.tsx?$').do(f => {
+      f.text = immaculata.compileWithSwc(f.text, opts => {
 
-    // require('./site/test1.tsx')
-    // console.log('in here2')
-    return files
+        opts.jsc ??= {}
+        opts.jsc.transform ??= {}
+        opts.jsc.transform.react ??= {}
+        opts.jsc.transform.react.importSource = '/foo/bar.js'
+
+        // delete opts.jsc.transform.react
+
+      }).code
+      f.path = f.path.replace(/\.tsx?$/, '.js')
+    })
+
   })
-  // console.log(`Time: ${Date.now() - start} ms`)
+
   server.files = map
-  immaculata.generateFiles(map, true)
+  // immaculata.generateFiles(map, true)
 }
 
 tree.watch({}, async (paths) => {
@@ -53,33 +53,3 @@ tree.watch({}, async (paths) => {
 
 console.log(' ')
 console.log('in main')
-
-
-async function processFilesAsync(fn: (files: immaculata.LiveFile[]) => Promise<immaculata.LiveFile[]>) {
-  let files: immaculata.LiveFile[] = [...tree.files.values()]
-  files = await fn(files)
-  return new Map(files.map(f => [f.path, f.content]))
-}
-
-// export function processFile(tree: immaculata.LiveTree, file: immaculata.LiveFile): immaculata.LiveFile[] {
-
-//   const out: immaculata.LiveFile[] = []
-
-//   let match
-//   if (match = file.path.match(isArrayFile)) {
-//     const exportedArray = require('.' + file.path).default as [string, any][]
-//     for (const [name, content] of exportedArray) {
-//       const filepath = file.path.replace(match.groups!["slug"]!, name)
-//       out.push({ path: filepath.slice(0, -match.groups!["ext"]!.length), content })
-//     }
-//   }
-//   else if (match = file.path.match(isSingleFile)) {
-//     const exportedContent = require('.' + file.path).default
-//     out.push({ path: file.path.slice(0, -match.groups!["ext"]!.length), content: exportedContent })
-//   }
-//   else {
-//     out.push(file)
-//   }
-
-//   return out
-// }

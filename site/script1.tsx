@@ -1,3 +1,3 @@
 console.log('in script1')
 
-const foo = 123
+const foo: number = <bar />
