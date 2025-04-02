@@ -2,7 +2,7 @@ import * as swc from '@swc/core'
 import { randomUUID } from "crypto"
 import type { JsxTransformer } from "./livetree.js"
 
-export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTransformer>) => string): JsxTransformer {
+export function makeModuleJsxTransformer(jsxImportSource: (...args: Parameters<JsxTransformer>) => string): JsxTransformer {
   return (treeRoot, filename, src, tsx) => {
     const result = compileWithSwc(src, opts => {
       opts.filename = filename
@@ -19,8 +19,8 @@ export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTra
   }
 }
 
-export const transformJsxToRootJsx = makeSwcTransformJsx(treeRoot => treeRoot + '/jsx-node.ts')
-export const transformJsxToStrings = makeSwcTransformJsx(() => 'immaculata/dist/jsx-strings.js')
+export const transformModuleJsxToRootJsx = makeModuleJsxTransformer(treeRoot => treeRoot + '/jsx-node.ts')
+export const transformModuleJsxToStrings = makeModuleJsxTransformer(() => 'immaculata/dist/jsx-strings.js')
 
 export function compileWithSwc(src: string, modifyOpts?: (opts: swc.Options) => void) {
   const opts: swc.Options = {
