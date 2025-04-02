@@ -3,6 +3,7 @@ import * as fs from "fs"
 import { registerHooks } from 'module'
 import * as posix from "path/posix"
 import { dirname, relative } from "path/posix"
+import { Pipeline } from './pipeline.js'
 
 declare module "module" {
   export function registerHooks(opts: {
@@ -18,8 +19,6 @@ export type JsxTransformer = (
   tsx: boolean,
 ) => string
 
-export type MemFile = { path: string, content: Buffer }
-
 export class LiveTree {
 
   public root: string
@@ -34,10 +33,10 @@ export class LiveTree {
     this.loadDir('/')
   }
 
-  public async processFiles(fn: (files: MemFile[]) => MemFile[] | Promise<MemFile[]>) {
-    let files: MemFile[] = [...this.files.values().map(f => ({ ...f }))]
-    files = await fn(files)
-    return new Map(files.map(f => [f.path, f.content]))
+  public async processFiles(fn: (pipeline: Pipeline) => void | Promise<void>) {
+    const pipeline = Pipeline.from(this.files)
+    await fn(pipeline)
+    return pipeline.results()
   }
 
   private loadDir(base: string) {
