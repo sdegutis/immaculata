@@ -34,9 +34,9 @@ export class LiveTree {
     this.loadDir('/')
   }
 
-  public processFiles(fn: (files: LiveFile[]) => LiveFile[]) {
-    let files: LiveFile[] = [...this.files.values()]
-    files = fn(files)
+  public async processFiles(fn: (files: LiveFile[]) => LiveFile[] | Promise<LiveFile[]>) {
+    let files: LiveFile[] = [...this.files.values().map(f => ({ ...f }))]
+    files = await fn(files)
     return new Map(files.map(f => [f.path, f.content]))
   }
 
