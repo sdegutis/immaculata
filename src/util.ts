@@ -43,7 +43,7 @@ export function compileWithSwc(src: string, modifyOpts?: (opts: swc.Options) => 
       transform: {
         react: {
           runtime: 'automatic',
-          importSource: '/jsx',
+          importSource: '/jsx.js',
         },
       },
     },
