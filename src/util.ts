@@ -3,29 +3,19 @@ import { randomUUID } from "crypto"
 import type { JsxTransformer } from "./livetree.js"
 
 export function makeSwcTransformJsx(jsxImportSource: (...args: Parameters<JsxTransformer>) => string): JsxTransformer {
-  const uuid = randomUUID()
   return (treeRoot, filename, src, tsx) => {
-    const result = swc.transformSync(src, {
-      filename,
-      isModule: true,
-      sourceMaps: 'inline',
-      jsc: {
-        keepClassNames: true,
-        target: 'esnext',
-        parser: tsx
-          ? { syntax: 'typescript', tsx: true, decorators: true }
-          : { syntax: 'ecmascript', jsx: true, decorators: true },
-        transform: {
-          react: {
-            runtime: 'automatic',
-            importSource: uuid,
-          },
-        },
-      },
+    const result = compileWithSwc(src, opts => {
+      opts.filename = filename
+      opts.jsc ??= {}
+      opts.jsc.parser = tsx
+        ? { syntax: 'typescript', tsx: true, decorators: true }
+        : { syntax: 'ecmascript', jsx: true, decorators: true }
+      opts.jsc ??= {}
+      opts.jsc.transform ??= {}
+      opts.jsc.transform.react ??= {}
+      opts.jsc.transform.react.importSource = jsxImportSource(treeRoot, filename, src, tsx)
     })
-    const oldJsxImport = `${uuid}/jsx-runtime`
-    const newJsxImport = jsxImportSource(treeRoot, filename, src, tsx)
-    return result.code.replace(oldJsxImport, newJsxImport)
+    return result.code
   }
 }
 
@@ -61,5 +51,5 @@ export function compileWithSwc(src: string, modifyOpts?: (opts: swc.Options) => 
 
   const result = swc.transformSync(src, opts)
   if (fixJsxImport) result.code = fixJsxImport(result.code)
-  return result.code
+  return result
 }
