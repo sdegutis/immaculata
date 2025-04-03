@@ -11,6 +11,7 @@ export class DevServer {
 
   public files: Map<string, Buffer | string> | undefined
   public handlers?: Map<string, (body: string) => string> | undefined
+  public notFound?: (path: string) => string
 
   public reload = () => this.events.dispatchEvent(new Event('reload'))
   private events = new EventTarget();
@@ -67,10 +68,14 @@ export class DevServer {
         return content && { url, blob: content }
       }
 
-      const found = (
+      let found = (
         getFile(url) ??
         getFile(path.posix.join(url, 'index.html'))
       )
+
+      if (!found && this.notFound) {
+        found = getFile(this.notFound(req.url!))
+      }
 
       if (found) {
         res.statusCode = 200
