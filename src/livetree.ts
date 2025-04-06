@@ -2,7 +2,7 @@ import * as chokidar from 'chokidar'
 import * as fs from "fs"
 import { registerHooks } from 'module'
 import * as posix from "path/posix"
-import { dirname, relative } from "path/posix"
+import { relative } from "path/posix"
 import { Pipeline } from './pipeline.js'
 
 declare module "module" {
@@ -142,20 +142,17 @@ export class LiveTree {
       .on('unlink', pathUpdated)
   }
 
-  public enableModules(transformJsx?: JsxTransformer) {
+  public moduleHook(): Parameters<typeof registerHooks>[0] {
+    return {
 
-    registerHooks({
+      resolve: (spec, context, next) => {
+        if (!spec.match(/^(\.|\/|file:\/\/\/)/)) return next(spec, context)
 
-      resolve: (url, context, next) => {
-        if (!url.match(/^(\.|\/|file:\/\/\/)/)) {
-          return next(url, context)
-        }
+        let path = new URL(spec, context.parentURL).href
+        if (!path.startsWith(this.base)) return next(spec, context)
 
-        let path = new URL(url, context.parentURL).href
-
-        if (!path.startsWith(this.base)) {
-          return next(url, context)
-        }
+        const found = this.files.get('/' + relative(this.base, path))
+        if (!found) return next(spec, context)
 
         if (context.parentURL?.startsWith(this.base) && !context.parentURL.endsWith('/noop.js')) {
           const depending = context.parentURL.slice(this.base.length).replace(/\?ver=\d+$/, '')
@@ -163,63 +160,29 @@ export class LiveTree {
           this.addDep(depending, depended)
         }
 
-        const rel = '/' + relative(this.base, path)
-        const found = (
-          this.files.get(rel) ??
-          this.files.get(rel + '.ts') ??
-          this.files.get(rel + '.tsx') ??
-          this.files.get(rel + '.jsx'))
-
-        if (!found) {
-          return next(url, context)
-        }
-
         const newurl = new URL('.' + found.path, this.base + '/')
         newurl.search = `ver=${found.version}`
 
-        return {
-          url: newurl.href,
-          shortCircuit: true,
-        }
+        return { url: newurl.href, shortCircuit: true }
       },
 
       load: (url, context, next) => {
         if (url.startsWith(this.base)) {
           url = url.replace(/\?ver=\d+$/, '')
 
-          const path = url.slice(this.base.length)
-          const found = this.files.get(path)
-
-          if (!found) {
-            return next(url, context)
-          }
-
-          const tsx = path.endsWith('.tsx')
-          const jsx = path.endsWith('.jsx')
-
-          if (transformJsx && (tsx || jsx)) {
-            const toRoot = relative(dirname(url), this.base) || '.'
-            const src = found.content.toString()
-            const output = transformJsx(toRoot, url, src, tsx)
-            return {
-              format: 'module',
-              shortCircuit: true,
-              source: output,
-            }
-          }
+          const found = this.files.get(url.slice(this.base.length))
+          if (!found) return next(url, context)
 
           return {
-            format: path.match(/\.tsx?$/) ? 'module-typescript' : 'module',
             shortCircuit: true,
+            format: found.path.match(/\.tsx?(\?|$)/) ? 'module-typescript' : 'module',
             source: found.content,
           }
         }
-
         return next(url, context)
       }
 
-    })
-
+    }
   }
 
 }
