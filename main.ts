@@ -3,18 +3,43 @@ import { randomUUID } from 'crypto'
 import { readFileSync } from 'fs'
 import { LiveTree } from 'immaculata'
 import { registerHooks } from 'module'
+import { relative } from 'path/posix'
 import { fileURLToPath } from 'url'
 
 const tree = new LiveTree('site', import.meta.url)
 
 registerHooks({
+
+  resolve: (spec, context, next) => {
+    if (!spec.match(/^(\.|\/|file:\/\/\/)/)) return next(spec, context)
+
+    let path = new URL(spec, context.parentURL).href
+    if (!path.startsWith(tree.base)) return next(spec, context)
+
+    const found = tree.files.get('/' + relative(tree.base, path))
+    if (!found) return next(spec, context)
+
+    if (context.parentURL?.startsWith(tree.base) && !context.parentURL.endsWith('/noop.js')) {
+      const depending = context.parentURL.slice(tree.base.length).replace(/\?ver=\d+$/, '')
+      const depended = path.slice(tree.base.length)
+      tree.addDep(depending, depended)
+    }
+
+    const newurl = new URL('.' + found.path, tree.base + '/')
+    newurl.search = `ver=${found.version}`
+
+    return { url: newurl.href, shortCircuit: true }
+  },
+
   load: (url, context, next) => {
     if (url.startsWith(tree.base)) {
+      url = url.replace(/\?ver=\d+$/, '')
+
       const path = url.slice(tree.base.length)
       const found = tree.files.get(path)
       if (!found) return next(url, context)
 
-      console.log('loading from tree')
+      // console.log('loading from tree')
       return {
         shortCircuit: true,
         format: found.path.match(/\.tsx?$/) ? 'module-typescript' : 'module',
@@ -27,28 +52,35 @@ registerHooks({
 
 registerHooks({
   resolve: (spec, ctx, next) => {
-    try { return next(spec, ctx) }
-    catch {
-      try { return next(spec.replace(/\.js$/, '.ts'), ctx) }
-      catch {
-        try { return next(spec.replace(/\.js$/, '.tsx'), ctx) }
-        catch {
-          return next(spec.replace(/\.js$/, '.jsx'), ctx)
-        }
+    const trySpec = (spec: string) => {
+      try { return next(spec, ctx) }
+      catch (e: any) {
+        if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e
+        return null
       }
     }
+    return (
+      trySpec(spec) ??
+      trySpec(spec.replace(/\.js(\?|$)/, '.ts$1')) ??
+      trySpec(spec.replace(/\.js(\?|$)/, '.tsx$1')) ??
+      trySpec(spec.replace(/\.js(\?|$)/, '.jsx$1')) ??
+      next(spec, ctx)
+    )
   },
 })
 
 registerHooks({
   load: (url, context, next) => {
-    const istsx = url.endsWith('.tsx')
-    const isjsx = url.endsWith('.jsx')
+    const istsx = url.match(/\.tsx\??/)
+    const isjsx = url.match(/\.jsx\??/)
     if (!isjsx && !istsx) return next(url, context)
 
     let source: string
     try { source = next(url, context).source!.toString() }
-    catch (e) { source = readFileSync(fileURLToPath(url), 'utf8') }
+    catch (e: any) {
+      if (e.code !== 'ERR_UNKNOWN_FILE_EXTENSION') throw e
+      source = readFileSync(fileURLToPath(url), 'utf8')
+    }
 
     const opts: Options = {
       isModule: true,
