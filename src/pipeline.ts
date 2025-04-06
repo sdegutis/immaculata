@@ -42,7 +42,7 @@ export class Pipeline {
     return this.#filters.every(f => f.regex.test(file.path) === !f.negate)
   }
 
-  add(path: string, content: string | Buffer, meta?: any) {
+  add(path: string, content: string | Buffer) {
     this.#real.push(new MemFile(path, content))
   }
 
