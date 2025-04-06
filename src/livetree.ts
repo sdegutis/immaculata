@@ -5,15 +5,10 @@ import * as posix from "path/posix"
 import { dirname, relative } from "path/posix"
 import { Pipeline } from './pipeline.js'
 
-type SyncRegisterHooks<T> =
-  T extends (a: infer A, b: infer B, next: (...args: infer I) => infer O) => infer R
-  ? (a: A, b: B, next: (...args: I) => Awaited<O>) => Awaited<R>
-  : T
-
 declare module "module" {
   export function registerHooks(opts: {
-    load?: SyncRegisterHooks<LoadHook>,
-    resolve?: SyncRegisterHooks<ResolveHook>,
+    load?: (url: string, context: LoadHookContext, nextLoad: (url: string, context?: Partial<LoadHookContext>) => LoadFnOutput) => LoadFnOutput,
+    resolve?: (specifier: string, context: ResolveHookContext, nextResolve: (specifier: string, context?: Partial<ResolveHookContext>) => ResolveFnOutput) => ResolveFnOutput,
   }): void
 }
 
