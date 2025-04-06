@@ -16,7 +16,7 @@ tree.watch({}, () => {
 registerHooks(tree.moduleHook())
 registerHooks(tryTsTsxJsxModuleHook)
 
-registerHooks(compileTsxHook((source, url) => {
+registerHooks(compileTsxModuleHook((source, url) => {
 
   const opts: Options = {
     isModule: true,
@@ -63,7 +63,7 @@ registerHooks(compileTsxHook((source, url) => {
 import('./site/a.js')
 
 
-function compileTsxHook(fn: (src: string, url: string) => string): Parameters<typeof registerHooks>[0] {
+function compileTsxModuleHook(fn: (src: string, url: string) => string): Parameters<typeof registerHooks>[0] {
   return {
 
     load: (url, context, next) => {
