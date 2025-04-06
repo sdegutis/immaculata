@@ -14,15 +14,15 @@ declare module "module" {
 
 export class LiveTree {
 
+  public path: string
   public root: string
-  public base: string
 
   public files = new Map<string, { path: string, content: Buffer, version: number }>();
   private deps = new Map<string, Set<string>>();
 
-  public constructor(root: string, importMetaUrl: string) {
-    this.root = root
-    this.base = new URL(this.root, importMetaUrl).href
+  public constructor(path: string, importMetaUrl: string) {
+    this.path = path
+    this.root = new URL(this.path, importMetaUrl).href
     this.loadDir('/')
   }
 
@@ -62,7 +62,7 @@ export class LiveTree {
   }
 
   private realPathFor(filepath: string) {
-    return posix.join(this.root, filepath)
+    return posix.join(this.path, filepath)
   }
 
   private addDep(requiredBy: string, requiring: string) {
@@ -72,7 +72,7 @@ export class LiveTree {
   }
 
   private pathsUpdated(...paths: string[]) {
-    const filepaths = paths.map(p => p.slice(this.root.length))
+    const filepaths = paths.map(p => p.slice(this.path.length))
 
     for (const filepath of filepaths) {
       if (fs.existsSync(this.realPathFor(filepath))) {
@@ -125,7 +125,7 @@ export class LiveTree {
       }, 100)
     }
 
-    chokidar.watch(this.root, {
+    chokidar.watch(this.path, {
       ...opts,
       ignoreInitial: true,
       cwd: process.cwd(),
@@ -142,28 +142,28 @@ export class LiveTree {
         if (!spec.match(/^(\.|\/|file:\/\/\/)/)) return next(spec, context)
 
         let path = new URL(spec, context.parentURL).href
-        if (!path.startsWith(this.base)) return next(spec, context)
+        if (!path.startsWith(this.root)) return next(spec, context)
 
-        const found = this.files.get('/' + relative(this.base, path))
+        const found = this.files.get('/' + relative(this.root, path))
         if (!found) return next(spec, context)
 
-        if (context.parentURL?.startsWith(this.base) && !context.parentURL.endsWith('/noop.js')) {
-          const depending = context.parentURL.slice(this.base.length).replace(/\?ver=\d+$/, '')
-          const depended = path.slice(this.base.length)
+        if (context.parentURL?.startsWith(this.root) && !context.parentURL.endsWith('/noop.js')) {
+          const depending = context.parentURL.slice(this.root.length).replace(/\?ver=\d+$/, '')
+          const depended = path.slice(this.root.length)
           this.addDep(depending, depended)
         }
 
-        const newurl = new URL('.' + found.path, this.base + '/')
+        const newurl = new URL('.' + found.path, this.root + '/')
         newurl.search = `ver=${found.version}`
 
         return { url: newurl.href, shortCircuit: true }
       },
 
       load: (url, context, next) => {
-        if (url.startsWith(this.base)) {
+        if (url.startsWith(this.root)) {
           url = url.replace(/\?ver=\d+$/, '')
 
-          const found = this.files.get(url.slice(this.base.length))
+          const found = this.files.get(url.slice(this.root.length))
           if (!found) return next(url, context)
 
           return {
