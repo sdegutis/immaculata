@@ -12,13 +12,6 @@ declare module "module" {
   }): void
 }
 
-export type JsxTransformer = (
-  treeRoot: string,
-  filename: string,
-  src: string,
-  tsx: boolean,
-) => string
-
 export class LiveTree {
 
   public root: string

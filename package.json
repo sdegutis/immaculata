@@ -11,7 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/thesoftwarephilosopher/immaculata.dev.git"
   },
-  "keywords": [ ],
+  "keywords": [],
   "author": "@thesoftwarephilosopher",
   "description": "Simple TypeScript/JSX SSG",
   "bugs": {
@@ -19,7 +19,6 @@
   },
   "homepage": "https://immaculata.dev",
   "dependencies": {
-    "@swc/core": "^1.11.13",
     "chokidar": "^4.0.3",
     "mime-types": "^3.0.1"
   },
