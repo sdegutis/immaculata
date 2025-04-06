@@ -23,11 +23,7 @@ registerHooks({
     const url = new URL(spec, ctx.parentURL).href
     if (url.startsWith(tree.base)) {
       const path = url.slice(tree.base.length)
-      const found = (
-        tree.files.get(path) ??
-        tree.files.get(path.replace(/\.js$/, '.ts')) ??
-        tree.files.get(path.replace(/\.js$/, '.tsx'))
-      )
+      const found = tree.files.get(path)
       if (found) {
         return {
           url: url.slice(0, tree.base.length) + found.path,
@@ -40,9 +36,7 @@ registerHooks({
   load: (url, context, next) => {
     if (url.startsWith(tree.base)) {
       const path = url.slice(tree.base.length)
-      const found = (
-        tree.files.get(path)
-      )
+      const found = tree.files.get(path)
       if (!found) return next(url, context)
       const hasTypes = found.path.match(/\.tsx?$/)
       if (found.path.endsWith('x')) context.format = hasTypes ? 'tsx' : 'jsx'
@@ -54,6 +48,16 @@ registerHooks({
     }
     return next(url, context)
   }
+})
+
+registerHooks({
+  resolve: (spec, ctx, next) => {
+    try { return next(spec, ctx) }
+    catch {
+      try { return next(spec.replace(/\.js$/, '.ts'), ctx) }
+      catch { return next(spec.replace(/\.js$/, '.tsx'), ctx) }
+    }
+  },
 })
 
 registerHooks({
