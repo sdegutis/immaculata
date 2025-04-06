@@ -1,19 +1,18 @@
 import { transformSync, type Options } from '@swc/core'
 import { randomUUID } from 'crypto'
 import { LiveTree } from 'immaculata'
-import { registerHooks, type LoadFnOutput } from 'module'
+import { registerHooks } from 'module'
 
 const tree = new LiveTree('site', import.meta.url)
 
 type Fix<T> =
-  // T extends (a:infer A, b:infer B, next: infer N) => infer R
-  // ? T
-  // : 
-  T
+  T extends (a: infer A, b: infer B, next: (...args: infer I) => infer O) => infer R
+  ? (a: A, b: B, next: (...args: I) => Awaited<O>) => Awaited<R>
+  : T
 
 declare module "module" {
   export function registerHooks(opts: {
-    load?: LoadHook,
+    load?: Fix<LoadHook>,
     resolve?: Fix<ResolveHook>,
   }): void
 }
@@ -31,6 +30,7 @@ registerHooks({
         }
       }
     }
+    // return new Promise(r => ({ url: '123' }))
     return next(spec, ctx)
   },
   load: (url, context, next) => {
@@ -67,7 +67,7 @@ registerHooks({
 
 registerHooks({
   load: (url, context, next) => {
-    const result = next(url, context) as LoadFnOutput
+    const result = next(url, context)
     if (context.format === 'tsx' || context.format === 'jsx') {
 
       const opts: Options = {
