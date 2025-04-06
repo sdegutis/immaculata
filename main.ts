@@ -1,55 +1,62 @@
-import * as immaculata from "immaculata"
+import { LiveTree } from 'immaculata'
+import { registerHooks } from 'module'
 
-const server = new immaculata.DevServer(8080)
-const tree = new immaculata.LiveTree('site', import.meta.url)
+const tree = new LiveTree('site', import.meta.url)
+const treeroot = new URL('site', import.meta.url).href
 
-tree.enableModules(immaculata.transformModuleJsxToStrings)
-
-processSite()
-
-
-
-
-async function processSite() {
-
-  const map = await tree.processFiles(async files => {
-
-    const r = /\..+(?<ext>\.tsx?)$/
-    await files.with(r).doAsync(async (file) => {
-      const match = file.path.match(r)!
-      const exports = await import('./site' + file.path)
-
-      file.path = file.path.slice(0, -match.groups!["ext"]!.length)
-      file.text = exports.default
-      // console.log([file.path])
-    })
-
-    files.with('\.tsx?$').do(f => {
-      f.text = immaculata.compileWithSwc(f.text, opts => {
-
-        opts.jsc ??= {}
-        opts.jsc.transform ??= {}
-        opts.jsc.transform.react ??= {}
-        opts.jsc.transform.react.importSource = '/foo/bar.js'
-
-        // delete opts.jsc.transform.react
-
-      }).code
-      f.path = f.path.replace(/\.tsx?$/, '.js')
-    })
-
-  })
-
-  server.files = map
-  // immaculata.generateFiles(map, true)
+declare module "module" {
+  export function registerHooks(opts: {
+    load?: LoadHook,
+    resolve?: ResolveHook,
+  }): void
 }
 
-tree.watch({}, async (paths) => {
-  console.log(' ')
-  console.log('paths changed', paths)
-  processSite()
-  server.reload()
+registerHooks({
+  resolve: (spec, ctx, next) => {
+    const absspec = new URL(spec, ctx.parentURL).href
+    if (absspec.startsWith(treeroot)) {
+      return { url: absspec, shortCircuit: true }
+    }
+    return next(spec, ctx)
+  },
 })
 
-console.log(' ')
-console.log('in main')
+registerHooks({
+  load: (url, context, next) => {
+    if (url.startsWith(treeroot)) {
+      const path = url.slice(treeroot.length)
+      const found = (
+        tree.files.get(path) ??
+        tree.files.get(path.replace(/\.js$/, '.ts')) ??
+        tree.files.get(path.replace(/\.js$/, '.tsx'))
+      )
+      return {
+        shortCircuit: true,
+        format: 'module-typescript',
+        source: found!.content,
+      }
+    }
+    return next(url, context)
+  }
+})
+
+// registerHooks({
+
+//   load: (url, context, next) => {
+
+//     // url = url.replace(/\.tsx?$/, '.js')
+
+//     const other = next(url, context)
+//     console.log(other)
+
+//     return {
+//       format: 'module-typescript',
+//       shortCircuit: true,
+//       source: `export const a = 1234; console.log('in fake a')`,
+//     }
+//     // return next(url, context)
+//   }
+
+// })
+
+import('./site/a.js')
