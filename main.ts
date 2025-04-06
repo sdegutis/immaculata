@@ -1,7 +1,9 @@
 import { transformSync, type Options } from '@swc/core'
 import { randomUUID } from 'crypto'
+import { readFileSync } from 'fs'
 import { LiveTree } from 'immaculata'
 import { registerHooks } from 'module'
+import { fileURLToPath } from 'url'
 
 const tree = new LiveTree('site', import.meta.url)
 
@@ -17,32 +19,26 @@ declare module "module" {
   }): void
 }
 
-registerHooks({
-  // resolve: (spec, ctx, next) => {
-  //   const url = new URL(spec, ctx.parentURL).href
-  //   if (url.startsWith(tree.base)) {
-  //     const path = url.slice(tree.base.length)
-  //     const found = tree.files.get(path)
-  //     if (found) return { url, shortCircuit: true }
-  //   }
-  //   return next(spec, ctx)
-  // },
-  load: (url, context, next) => {
-    if (url.startsWith(tree.base)) {
-      const path = url.slice(tree.base.length)
-      const found = tree.files.get(path)
-      if (!found) return next(url, context)
-      const hasTypes = found.path.match(/\.tsx?$/)
-      if (found.path.endsWith('x')) context.format = hasTypes ? 'tsx' : 'jsx'
-      return {
-        shortCircuit: true,
-        format: hasTypes ? 'module-typescript' : 'module',
-        source: found.content,
-      }
-    }
-    return next(url, context)
-  }
-})
+// registerHooks({
+//   load: (url, context, next) => {
+//     if (url.startsWith(tree.base)) {
+//       const path = url.slice(tree.base.length)
+//       const found = tree.files.get(path)
+//       if (!found) return next(url, context)
+
+//       const hasTypes = found.path.match(/\.tsx?$/)
+//       if (found.path.endsWith('x')) context.format = hasTypes ? 'tsx' : 'jsx'
+
+//       console.log('loading from tree')
+//       return {
+//         shortCircuit: true,
+//         format: hasTypes ? 'module-typescript' : 'module',
+//         source: found.content,
+//       }
+//     }
+//     return next(url, context)
+//   }
+// })
 
 registerHooks({
   resolve: (spec, ctx, next) => {
@@ -61,8 +57,20 @@ registerHooks({
 
 registerHooks({
   load: (url, context, next) => {
-    const result = next(url, context)
-    if (context.format === 'tsx' || context.format === 'jsx') {
+    const istsx = url.endsWith('.tsx')
+    const isjsx = url.endsWith('.jsx')
+
+    let result: ReturnType<typeof next>
+    try { result = next(url, context) }
+    catch (e) {
+      result = {
+        source: readFileSync(fileURLToPath(url), 'utf8'),
+        format: 'module',
+        shortCircuit: true,
+      }
+    }
+
+    if (istsx || isjsx) {
 
       const opts: Options = {
         isModule: true,
@@ -81,13 +89,13 @@ registerHooks({
       }
 
       opts.jsc ??= {}
-      opts.jsc.parser = context.format === 'tsx'
+      opts.jsc.parser = istsx
         ? { syntax: 'typescript', tsx: true, decorators: true }
         : { syntax: 'ecmascript', jsx: true, decorators: true }
       opts.jsc ??= {}
       opts.jsc.transform ??= {}
       opts.jsc.transform.react ??= {}
-      opts.jsc.transform.react.importSource = './reactlike.ts'
+      opts.jsc.transform.react.importSource = tree.base + '/reactlike.ts'
 
 
       let fixJsxImport
