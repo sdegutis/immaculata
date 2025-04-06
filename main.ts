@@ -24,10 +24,7 @@ registerHooks(compileJsxTsxModuleHook((source, url) => {
         ? { syntax: 'typescript', tsx: true, decorators: true }
         : { syntax: 'ecmascript', jsx: true, decorators: true },
       transform: {
-        react: {
-          runtime: 'automatic',
-          importSource: tree.base,
-        },
+        react: { runtime: 'automatic', },
       },
     },
   }).code
