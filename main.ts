@@ -1,5 +1,4 @@
-import { transformSync, type Options } from '@swc/core'
-import { randomUUID } from 'crypto'
+import { transformSync } from '@swc/core'
 import { compileJsxTsxModuleHook, LiveTree, tryTsTsxJsxModuleHook } from 'immaculata'
 import { registerHooks } from 'module'
 
@@ -14,48 +13,35 @@ tree.watch({}, () => {
 registerHooks(tree.moduleHook())
 registerHooks(tryTsTsxJsxModuleHook)
 
-registerHooks(compileJsxTsxModuleHook((source, url) => {
+function jsxRuntimeModuleHook(jsx: string): Parameters<typeof registerHooks>[0] {
+  return {
+    resolve: (spec, ctx, next) => {
+      if (spec.endsWith('/jsx-runtime')) spec = jsx
+      return next(spec, ctx)
+    }
+  }
+}
 
-  const opts: Options = {
+registerHooks(jsxRuntimeModuleHook('immaculata/dist/jsx-strings.js'))
+
+registerHooks(compileJsxTsxModuleHook((source, url) => {
+  return transformSync(source, {
     isModule: true,
     sourceMaps: 'inline',
     jsc: {
       keepClassNames: true,
       target: 'esnext',
-      parser: { syntax: 'typescript', tsx: true, decorators: true },
+      parser: url.match(/\.tsx(\?|$)/)
+        ? { syntax: 'typescript', tsx: true, decorators: true }
+        : { syntax: 'ecmascript', jsx: true, decorators: true },
       transform: {
         react: {
           runtime: 'automatic',
-          importSource: '/jsx.js',
+          importSource: tree.base,
         },
       },
     },
-  }
-
-  opts.jsc ??= {}
-  opts.jsc.parser = url.match(/\.tsx(\?|$)/)
-    ? { syntax: 'typescript', tsx: true, decorators: true }
-    : { syntax: 'ecmascript', jsx: true, decorators: true }
-  opts.jsc ??= {}
-  opts.jsc.transform ??= {}
-  opts.jsc.transform.react ??= {}
-  opts.jsc.transform.react.importSource = tree.base + '/reactlike.ts'
-
-
-  let fixJsxImport
-  if (opts.jsc?.transform?.react?.importSource) {
-    const uuid = randomUUID()
-    const fakeImport = `${uuid}/jsx-runtime`
-    const realImport = opts.jsc.transform.react.importSource
-    opts.jsc.transform.react.importSource = uuid
-    fixJsxImport = (code: string) => code.replace(fakeImport, realImport)
-  }
-
-  source = transformSync(source, opts).code
-  if (fixJsxImport) source = fixJsxImport(source)
-
-  return source
-
+  }).code
 }))
 
 import('./site/a.js')
