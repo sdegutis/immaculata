@@ -13,9 +13,9 @@ declare module "module" {
 
 registerHooks({
   resolve: (spec, ctx, next) => {
-    const absspec = new URL(spec, ctx.parentURL).href
-    if (absspec.startsWith(treeroot)) {
-      return { url: absspec, shortCircuit: true }
+    const url = new URL(spec, ctx.parentURL).href
+    if (url.startsWith(treeroot)) {
+      return { url, shortCircuit: true }
     }
     return next(spec, ctx)
   },
