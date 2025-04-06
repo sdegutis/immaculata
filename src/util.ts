@@ -1,4 +1,6 @@
+import { readFileSync } from "fs"
 import type { registerHooks } from "module"
+import { fileURLToPath } from "url"
 
 export const tryTsTsxJsxModuleHook: Parameters<typeof registerHooks>[0] = {
 
@@ -22,4 +24,27 @@ export const tryTsTsxJsxModuleHook: Parameters<typeof registerHooks>[0] = {
 
   },
 
+}
+
+export function compileJsxTsxModuleHook(fn: (src: string, url: string) => string): Parameters<typeof registerHooks>[0] {
+  return {
+
+    load: (url, context, next) => {
+      const istsx = url.match(/\.tsx(\?|$)/)
+      const isjsx = url.match(/\.jsx(\?|$)/)
+      if (!isjsx && !istsx) return next(url, context)
+
+      let source: string
+      try { source = next(url, context).source!.toString() }
+      catch (e: any) {
+        if (e.code !== 'ERR_UNKNOWN_FILE_EXTENSION') throw e
+        source = readFileSync(fileURLToPath(url), 'utf8')
+      }
+
+      source = fn(source, url)
+
+      return { source, format: 'module', shortCircuit: true }
+    }
+
+  }
 }
