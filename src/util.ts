@@ -41,9 +41,11 @@ export function compileJsxTsxModuleHook(fn: (src: string, url: string) => string
         source = readFileSync(fileURLToPath(url), 'utf8')
       }
 
-      source = fn(source, url)
-
-      return { source, format: 'module', shortCircuit: true }
+      return {
+        source: fn(source, url),
+        format: 'module',
+        shortCircuit: true,
+      }
     }
 
   }
