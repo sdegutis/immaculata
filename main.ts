@@ -1,9 +1,7 @@
 import { transformSync, type Options } from '@swc/core'
 import { randomUUID } from 'crypto'
-import { readFileSync } from 'fs'
-import { LiveTree, tryTsTsxJsxModuleHook } from 'immaculata'
+import { compileJsxTsxModuleHook, LiveTree, tryTsTsxJsxModuleHook } from 'immaculata'
 import { registerHooks } from 'module'
-import { fileURLToPath } from 'url'
 
 const tree = new LiveTree('site', import.meta.url)
 
@@ -16,7 +14,7 @@ tree.watch({}, () => {
 registerHooks(tree.moduleHook())
 registerHooks(tryTsTsxJsxModuleHook)
 
-registerHooks(compileTsxModuleHook((source, url) => {
+registerHooks(compileJsxTsxModuleHook((source, url) => {
 
   const opts: Options = {
     isModule: true,
@@ -61,27 +59,3 @@ registerHooks(compileTsxModuleHook((source, url) => {
 }))
 
 import('./site/a.js')
-
-
-function compileTsxModuleHook(fn: (src: string, url: string) => string): Parameters<typeof registerHooks>[0] {
-  return {
-
-    load: (url, context, next) => {
-      const istsx = url.match(/\.tsx(\?|$)/)
-      const isjsx = url.match(/\.jsx(\?|$)/)
-      if (!isjsx && !istsx) return next(url, context)
-
-      let source: string
-      try { source = next(url, context).source!.toString() }
-      catch (e: any) {
-        if (e.code !== 'ERR_UNKNOWN_FILE_EXTENSION') throw e
-        source = readFileSync(fileURLToPath(url), 'utf8')
-      }
-
-      source = fn(source, url)
-
-      return { source, format: 'module', shortCircuit: true }
-    }
-
-  }
-}
