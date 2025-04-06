@@ -1,5 +1,5 @@
 import { transformSync } from '@swc/core'
-import { compileJsxTsxModuleHook, LiveTree, tryTsTsxJsxModuleHook } from 'immaculata'
+import { compileJsxTsxModuleHook, jsxRuntimeModuleHook, LiveTree, tryTsTsxJsxModuleHook } from 'immaculata'
 import { registerHooks } from 'module'
 
 const tree = new LiveTree('site', import.meta.url)
@@ -12,18 +12,7 @@ tree.watch({}, () => {
 
 registerHooks(tree.moduleHook())
 registerHooks(tryTsTsxJsxModuleHook)
-
-function jsxRuntimeModuleHook(jsx: string): Parameters<typeof registerHooks>[0] {
-  return {
-    resolve: (spec, ctx, next) => {
-      if (spec.endsWith('/jsx-runtime')) spec = jsx
-      return next(spec, ctx)
-    }
-  }
-}
-
-registerHooks(jsxRuntimeModuleHook('immaculata/dist/jsx-strings.js'))
-
+registerHooks(jsxRuntimeModuleHook(tree.base + '/reactlike.js'))
 registerHooks(compileJsxTsxModuleHook((source, url) => {
   return transformSync(source, {
     isModule: true,
