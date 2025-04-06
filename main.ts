@@ -8,6 +8,12 @@ import { fileURLToPath } from 'url'
 
 const tree = new LiveTree('site', import.meta.url)
 
+tree.watch({}, () => {
+  console.log('')
+  console.log('changed')
+  import('./site/a.js')
+})
+
 registerHooks({
 
   resolve: (spec, context, next) => {
