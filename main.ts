@@ -16,8 +16,7 @@ tree.watch({}, () => {
 registerHooks(tree.moduleHook())
 registerHooks(tryTsTsxJsxModuleHook)
 
-registerHooks(compileTsxHook((source, types) => {
-
+registerHooks(compileTsxHook((source, url) => {
 
   const opts: Options = {
     isModule: true,
@@ -36,7 +35,7 @@ registerHooks(compileTsxHook((source, types) => {
   }
 
   opts.jsc ??= {}
-  opts.jsc.parser = types
+  opts.jsc.parser = url.match(/\.tsx(\?|$)/)
     ? { syntax: 'typescript', tsx: true, decorators: true }
     : { syntax: 'ecmascript', jsx: true, decorators: true }
   opts.jsc ??= {}
@@ -64,7 +63,7 @@ registerHooks(compileTsxHook((source, types) => {
 import('./site/a.js')
 
 
-function compileTsxHook(fn: (src: string, types: boolean) => string): Parameters<typeof registerHooks>[0] {
+function compileTsxHook(fn: (src: string, url: string) => string): Parameters<typeof registerHooks>[0] {
   return {
 
     load: (url, context, next) => {
@@ -79,7 +78,7 @@ function compileTsxHook(fn: (src: string, types: boolean) => string): Parameters
         source = readFileSync(fileURLToPath(url), 'utf8')
       }
 
-      source = fn(source, !!istsx)
+      source = fn(source, url)
 
       return { source, format: 'module', shortCircuit: true }
     }
