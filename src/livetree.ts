@@ -106,7 +106,7 @@ export class LiveTree {
     }
   }
 
-  public watch(opts: chokidar.ChokidarOptions, onchange: (paths: Set<string>) => void) {
+  public watch(opts?: chokidar.ChokidarOptions, onchange?: (paths: Set<string>) => void) {
     const updatedPaths = new Set<string>()
     let reloadFsTimer: NodeJS.Timeout
 
@@ -116,7 +116,7 @@ export class LiveTree {
       reloadFsTimer = setTimeout(async () => {
         try {
           this.pathsUpdated(...updatedPaths)
-          onchange(updatedPaths)
+          onchange?.(updatedPaths)
           updatedPaths.clear()
         }
         catch (e) {
