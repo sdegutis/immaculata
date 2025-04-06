@@ -7,38 +7,23 @@ import { fileURLToPath } from 'url'
 
 const tree = new LiveTree('site', import.meta.url)
 
-type Fix<T> =
-  T extends (a: infer A, b: infer B, next: (...args: infer I) => infer O) => infer R
-  ? (a: A, b: B, next: (...args: I) => Awaited<O>) => Awaited<R>
-  : T
+registerHooks({
+  load: (url, context, next) => {
+    if (url.startsWith(tree.base)) {
+      const path = url.slice(tree.base.length)
+      const found = tree.files.get(path)
+      if (!found) return next(url, context)
 
-declare module "module" {
-  export function registerHooks(opts: {
-    load?: Fix<LoadHook>,
-    resolve?: Fix<ResolveHook>,
-  }): void
-}
-
-// registerHooks({
-//   load: (url, context, next) => {
-//     if (url.startsWith(tree.base)) {
-//       const path = url.slice(tree.base.length)
-//       const found = tree.files.get(path)
-//       if (!found) return next(url, context)
-
-//       const hasTypes = found.path.match(/\.tsx?$/)
-//       if (found.path.endsWith('x')) context.format = hasTypes ? 'tsx' : 'jsx'
-
-//       console.log('loading from tree')
-//       return {
-//         shortCircuit: true,
-//         format: hasTypes ? 'module-typescript' : 'module',
-//         source: found.content,
-//       }
-//     }
-//     return next(url, context)
-//   }
-// })
+      console.log('loading from tree')
+      return {
+        shortCircuit: true,
+        format: found.path.match(/\.tsx?$/) ? 'module-typescript' : 'module',
+        source: found.content,
+      }
+    }
+    return next(url, context)
+  }
+})
 
 registerHooks({
   resolve: (spec, ctx, next) => {
@@ -103,7 +88,6 @@ registerHooks({
     source = transformSync(source, opts).code
     if (fixJsxImport) source = fixJsxImport(source)
     return { source, format: 'module', shortCircuit: true }
-
   }
 })
 
