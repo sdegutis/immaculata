@@ -50,3 +50,12 @@ export function compileJsxTsxModuleHook(fn: (src: string, url: string) => string
 
   }
 }
+
+export function jsxRuntimeModuleHook(jsx: string): Parameters<typeof registerHooks>[0] {
+  return {
+    resolve: (spec, ctx, next) => {
+      if (spec.endsWith('/jsx-runtime')) spec = jsx
+      return next(spec, ctx)
+    }
+  }
+}
