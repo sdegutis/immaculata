@@ -18,15 +18,15 @@ declare module "module" {
 }
 
 registerHooks({
-  resolve: (spec, ctx, next) => {
-    const url = new URL(spec, ctx.parentURL).href
-    if (url.startsWith(tree.base)) {
-      const path = url.slice(tree.base.length)
-      const found = tree.files.get(path)
-      if (found) return { url, shortCircuit: true }
-    }
-    return next(spec, ctx)
-  },
+  // resolve: (spec, ctx, next) => {
+  //   const url = new URL(spec, ctx.parentURL).href
+  //   if (url.startsWith(tree.base)) {
+  //     const path = url.slice(tree.base.length)
+  //     const found = tree.files.get(path)
+  //     if (found) return { url, shortCircuit: true }
+  //   }
+  //   return next(spec, ctx)
+  // },
   load: (url, context, next) => {
     if (url.startsWith(tree.base)) {
       const path = url.slice(tree.base.length)
@@ -87,7 +87,7 @@ registerHooks({
       opts.jsc ??= {}
       opts.jsc.transform ??= {}
       opts.jsc.transform.react ??= {}
-      opts.jsc.transform.react.importSource = 'reactlike.ts'
+      opts.jsc.transform.react.importSource = './reactlike.ts'
 
 
       let fixJsxImport
