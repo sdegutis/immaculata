@@ -59,59 +59,51 @@ registerHooks({
   load: (url, context, next) => {
     const istsx = url.endsWith('.tsx')
     const isjsx = url.endsWith('.jsx')
+    if (!isjsx && !istsx) return next(url, context)
 
-    let result: ReturnType<typeof next>
-    try { result = next(url, context) }
-    catch (e) {
-      result = {
-        source: readFileSync(fileURLToPath(url), 'utf8'),
-        format: 'module',
-        shortCircuit: true,
-      }
-    }
+    let source: string
+    try { source = next(url, context).source!.toString() }
+    catch (e) { source = readFileSync(fileURLToPath(url), 'utf8') }
 
-    if (istsx || isjsx) {
-
-      const opts: Options = {
-        isModule: true,
-        sourceMaps: 'inline',
-        jsc: {
-          keepClassNames: true,
-          target: 'esnext',
-          parser: { syntax: 'typescript', tsx: true, decorators: true },
-          transform: {
-            react: {
-              runtime: 'automatic',
-              importSource: '/jsx.js',
-            },
+    const opts: Options = {
+      isModule: true,
+      sourceMaps: 'inline',
+      jsc: {
+        keepClassNames: true,
+        target: 'esnext',
+        parser: { syntax: 'typescript', tsx: true, decorators: true },
+        transform: {
+          react: {
+            runtime: 'automatic',
+            importSource: '/jsx.js',
           },
         },
-      }
-
-      opts.jsc ??= {}
-      opts.jsc.parser = istsx
-        ? { syntax: 'typescript', tsx: true, decorators: true }
-        : { syntax: 'ecmascript', jsx: true, decorators: true }
-      opts.jsc ??= {}
-      opts.jsc.transform ??= {}
-      opts.jsc.transform.react ??= {}
-      opts.jsc.transform.react.importSource = tree.base + '/reactlike.ts'
-
-
-      let fixJsxImport
-      if (opts.jsc?.transform?.react?.importSource) {
-        const uuid = randomUUID()
-        const fakeImport = `${uuid}/jsx-runtime`
-        const realImport = opts.jsc.transform.react.importSource
-        opts.jsc.transform.react.importSource = uuid
-        fixJsxImport = (code: string) => code.replace(fakeImport, realImport)
-      }
-
-      let source = transformSync(result.source!.toString(), opts)
-      if (fixJsxImport) source.code = fixJsxImport(source.code)
-      return { ...result, source: source.code, format: 'module' }
+      },
     }
-    return result
+
+    opts.jsc ??= {}
+    opts.jsc.parser = istsx
+      ? { syntax: 'typescript', tsx: true, decorators: true }
+      : { syntax: 'ecmascript', jsx: true, decorators: true }
+    opts.jsc ??= {}
+    opts.jsc.transform ??= {}
+    opts.jsc.transform.react ??= {}
+    opts.jsc.transform.react.importSource = tree.base + '/reactlike.ts'
+
+
+    let fixJsxImport
+    if (opts.jsc?.transform?.react?.importSource) {
+      const uuid = randomUUID()
+      const fakeImport = `${uuid}/jsx-runtime`
+      const realImport = opts.jsc.transform.react.importSource
+      opts.jsc.transform.react.importSource = uuid
+      fixJsxImport = (code: string) => code.replace(fakeImport, realImport)
+    }
+
+    source = transformSync(source, opts).code
+    if (fixJsxImport) source = fixJsxImport(source)
+    return { source, format: 'module', shortCircuit: true }
+
   }
 })
 
