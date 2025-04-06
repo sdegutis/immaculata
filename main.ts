@@ -23,14 +23,8 @@ registerHooks({
     if (url.startsWith(tree.base)) {
       const path = url.slice(tree.base.length)
       const found = tree.files.get(path)
-      if (found) {
-        return {
-          url: url.slice(0, tree.base.length) + found.path,
-          shortCircuit: true
-        }
-      }
+      if (found) return { url, shortCircuit: true }
     }
-    // return new Promise(r => ({ url: '123' }))
     return next(spec, ctx)
   },
   load: (url, context, next) => {
