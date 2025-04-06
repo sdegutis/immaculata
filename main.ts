@@ -12,7 +12,7 @@ tree.watch({}, () => {
 
 registerHooks(tree.moduleHook())
 registerHooks(tryTsTsxJsxModuleHook)
-registerHooks(jsxRuntimeModuleHook(tree.base + '/reactlike.js'))
+registerHooks(jsxRuntimeModuleHook('immaculata/dist/jsx-strings.js'))
 registerHooks(compileJsxTsxModuleHook((source, url) => {
   return transformSync(source, {
     isModule: true,
