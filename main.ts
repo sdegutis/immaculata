@@ -55,7 +55,12 @@ registerHooks({
     try { return next(spec, ctx) }
     catch {
       try { return next(spec.replace(/\.js$/, '.ts'), ctx) }
-      catch { return next(spec.replace(/\.js$/, '.tsx'), ctx) }
+      catch {
+        try { return next(spec.replace(/\.js$/, '.tsx'), ctx) }
+        catch {
+          return next(spec.replace(/\.js$/, '.jsx'), ctx)
+        }
+      }
     }
   },
 })
@@ -88,7 +93,7 @@ registerHooks({
       opts.jsc ??= {}
       opts.jsc.transform ??= {}
       opts.jsc.transform.react ??= {}
-      opts.jsc.transform.react.importSource = 'reactlike.js'
+      opts.jsc.transform.react.importSource = 'reactlike.ts'
 
 
       let fixJsxImport
