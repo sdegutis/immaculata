@@ -12,12 +12,19 @@ declare module "module" {
   }): void
 }
 
+export type LiveFile = {
+  path: string,
+  content: Buffer,
+  version: number,
+  requiredBy: (requiredBy: string) => void,
+}
+
 export class LiveTree {
 
   public path: string
   public root: string
 
-  public files = new Map<string, { path: string, content: Buffer, version: number }>();
+  public files = new Map<string, LiveFile>();
   private deps = new Map<string, Set<string>>();
 
   public constructor(path: string, importMetaUrl: string) {
@@ -53,7 +60,11 @@ export class LiveTree {
     const content = fs.readFileSync(this.realPathFor(path))
     const version = Date.now()
     this.deleteFromCache(path)
-    this.files.set(path, { path, content, version })
+    const requiredBy = (by: string) => {
+      if (by.startsWith('file://')) by = by.slice(this.root.length)
+      this.addDep(by, path)
+    }
+    this.files.set(path, { path, content, version, requiredBy })
   }
 
   private deleteFromCache(path: string) {
@@ -66,6 +77,7 @@ export class LiveTree {
   }
 
   private addDep(requiredBy: string, requiring: string) {
+    requiredBy = requiredBy.replace(/\?ver=\d+$/, '')
     let list = this.deps.get(requiring)
     if (!list) this.deps.set(requiring, list = new Set())
     list.add(requiredBy)
@@ -148,7 +160,7 @@ export class LiveTree {
         if (!found) return next(spec, context)
 
         if (context.parentURL?.startsWith(this.root) && !context.parentURL.endsWith('/noop.js')) {
-          const depending = context.parentURL.slice(this.root.length).replace(/\?ver=\d+$/, '')
+          const depending = context.parentURL.slice(this.root.length)
           const depended = path.slice(this.root.length)
           this.addDep(depending, depended)
         }
