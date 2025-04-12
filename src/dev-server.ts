@@ -65,7 +65,7 @@ export class DevServer {
 
       const getFile = (url: string) => {
         const content = this.files?.get(url)
-        return content && { url, blob: content }
+        return content ? { url, blob: content } : undefined
       }
 
       let found = (
@@ -73,20 +73,17 @@ export class DevServer {
         getFile(path.posix.join(url, 'index.html'))
       )
 
-      if (!found && this.notFound) {
-        found = getFile(this.notFound(req.url!))
+      if (!found) {
+        res.statusCode = 404
+        found = this.notFound ? getFile(this.notFound(req.url!)) : undefined
+        res.end(found?.blob ?? 'File not found')
+        return
       }
 
-      if (found) {
-        res.statusCode = 200
-        const contentType = mimetypes.contentType(path.extname(found.url))
-        res.setHeader('content-type', contentType || 'application/octet-stream')
-        res.end(found.blob)
-      }
-      else {
-        res.statusCode = 404
-        res.end('File not found')
-      }
+      res.statusCode = 200
+      const contentType = mimetypes.contentType(path.extname(found.url))
+      res.setHeader('content-type', contentType || 'application/octet-stream')
+      res.end(found.blob)
     })
 
     server.listen(port)
