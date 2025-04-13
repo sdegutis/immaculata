@@ -143,7 +143,7 @@ export class LiveTree {
     }))
   }
 
-  public moduleHook(): Parameters<typeof registerHooks>[0] {
+  public enableImportsModuleHook(): Parameters<typeof registerHooks>[0] {
     return {
 
       resolve: (spec, context, next) => {
