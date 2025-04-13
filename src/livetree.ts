@@ -1,4 +1,3 @@
-import * as chokidar from 'chokidar'
 import * as fs from "fs"
 import { registerHooks } from 'module'
 import * as posix from "path/posix"
@@ -84,10 +83,11 @@ export class LiveTree {
   }
 
   private pathsUpdated(...paths: string[]) {
-    const filepaths = paths.map(p => p.slice(this.path.length))
+    for (const filepath of paths) {
+      const realPath = this.realPathFor(filepath)
+      const stat = fs.existsSync(realPath) ? fs.statSync(realPath) : undefined
 
-    for (const filepath of filepaths) {
-      if (fs.existsSync(this.realPathFor(filepath))) {
+      if (stat?.isFile()) {
         this.createFile(filepath)
       }
       else {
@@ -96,7 +96,7 @@ export class LiveTree {
     }
 
     const resetSeen = new Set<string>()
-    for (const filepath of filepaths) {
+    for (const filepath of paths) {
       this.resetDepTree(filepath, resetSeen)
     }
   }
@@ -118,12 +118,17 @@ export class LiveTree {
     }
   }
 
-  public watch(opts?: chokidar.ChokidarOptions, onchange?: (paths: Set<string>) => void) {
+  public watch(opts?: { ignored?: (path: string) => boolean }, onchange?: (paths: Set<string>) => void) {
     const updatedPaths = new Set<string>()
     let reloadFsTimer: NodeJS.Timeout
 
-    const pathUpdated = (filePath: string) => {
-      updatedPaths.add(filePath.split(posix.win32.sep).join(posix.posix.sep))
+    return fs.watch(this.path, { recursive: true }, ((type, filePath) => {
+      if (!filePath) return
+      const normalized = '/' + filePath.split(posix.win32.sep).join(posix.posix.sep)
+
+      if (opts?.ignored?.(normalized)) return
+      updatedPaths.add(normalized)
+
       clearTimeout(reloadFsTimer)
       reloadFsTimer = setTimeout(async () => {
         try {
@@ -135,16 +140,7 @@ export class LiveTree {
           console.error(e)
         }
       }, 100)
-    }
-
-    chokidar.watch(this.path, {
-      ...opts,
-      ignoreInitial: true,
-      cwd: process.cwd(),
-    })
-      .on('add', pathUpdated)
-      .on('change', pathUpdated)
-      .on('unlink', pathUpdated)
+    }))
   }
 
   public moduleHook(): Parameters<typeof registerHooks>[0] {
