@@ -15,6 +15,12 @@ class MemFile {
   set text(s) { this.#text = s }
   textOrContent() { return this.#text ?? this.content }
 
+  copy() {
+    const copy = new MemFile(this.path, this.content)
+    copy.#text = this.#text
+    return copy
+  }
+
 }
 
 type Filter = { regex: RegExp, negate: boolean }
@@ -36,6 +42,10 @@ export class Pipeline {
 
   all() {
     return this.#real.filter(file => this.#matches(file))
+  }
+
+  copy() {
+    return new Pipeline(this.#real.map(f => f.copy()), this.#filters)
   }
 
   #matches(file: MemFile): boolean {
