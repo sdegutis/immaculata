@@ -13,7 +13,7 @@ export class DevServer {
 
   public constructor(port: number, opts?: {
     hmrPath?: string,
-    onRequest?: (res: http.ServerResponse) => 'handled' | undefined,
+    onRequest?: (res: http.ServerResponse) => 'handled' | void,
   }) {
     const hmrPath = opts?.hmrPath
 
