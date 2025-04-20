@@ -43,19 +43,14 @@ export class DevServer {
         return
       }
 
-      const getFile = (url: string) => {
-        const content = this.files?.get(url)
-        return content ? { url, blob: content } : undefined
-      }
-
       let found = (
-        getFile(url) ??
-        getFile(path.posix.join(url, 'index.html'))
+        this.getFile(url) ??
+        this.getFile(path.posix.join(url, 'index.html'))
       )
 
       if (!found) {
         res.statusCode = 404
-        found = this.notFound ? getFile(this.notFound(req.url!)) : undefined
+        found = this.notFound ? this.getFile(this.notFound(req.url!)) : undefined
         res.end(found?.blob ?? 'File not found')
         return
       }
@@ -82,6 +77,11 @@ export class DevServer {
     server.on('listening', () => {
       console.log(`Running on http://localhost:${port}`)
     })
+  }
+
+  private getFile(url: string) {
+    const content = this.files?.get(url)
+    return content ? { url, blob: content } : undefined
   }
 
 }
