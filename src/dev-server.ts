@@ -5,7 +5,6 @@ import * as path from 'path'
 export class DevServer {
 
   public files: Map<string, Buffer | string> | undefined
-  public handlers?: Map<string, (body: string) => string> | undefined
   public notFound?: (path: string) => string
 
   public reload = () => this.events.dispatchEvent(new Event('reload'))
@@ -41,27 +40,6 @@ export class DevServer {
         res.setHeader('cache-control', 'no-cache')
         res.flushHeaders()
         this.reloadables.add(res)
-        return
-      }
-
-      if (req.method === 'POST') {
-        const handler = this.handlers?.get(url)
-        if (handler) {
-          const data: Buffer[] = []
-          req.on('data', (chunk) => {
-            data.push(chunk)
-          })
-          req.on('end', () => {
-            let redirect: string
-            this.events.addEventListener('reload', () => {
-              res.statusCode = 302
-              res.setHeader('Location', redirect)
-              res.end()
-            }, { once: true })
-            const body = Buffer.concat(data).toString('utf8')
-            redirect = handler(body)
-          })
-        }
         return
       }
 
