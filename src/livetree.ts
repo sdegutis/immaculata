@@ -2,6 +2,7 @@ import * as fs from "fs"
 import { registerHooks } from 'module'
 import * as posix from "path/posix"
 import { relative } from "path/posix"
+import { fileURLToPath } from "url"
 import { Pipeline } from './pipeline.js'
 
 declare module "module" {
@@ -72,7 +73,7 @@ export class LiveTree {
   }
 
   private realPathFor(filepath: string) {
-    return posix.join(this.path, filepath)
+    return fileURLToPath(new URL(filepath.slice(1), this.root + '/'))
   }
 
   private addDep(requiredBy: string, requiring: string) {
@@ -122,7 +123,7 @@ export class LiveTree {
     const updatedPaths = new Set<string>()
     let reloadFsTimer: NodeJS.Timeout
 
-    return fs.watch(this.path, { recursive: true }, ((type, filePath) => {
+    return fs.watch(fileURLToPath(this.root), { recursive: true }, ((type, filePath) => {
       if (!filePath) return
       const normalized = '/' + filePath.split(posix.win32.sep).join(posix.posix.sep)
 
