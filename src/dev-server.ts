@@ -19,6 +19,7 @@ export class DevServer {
 
   public constructor(port: number, opts?: {
     hmrPath?: string,
+    onRequest?: (res: http.ServerResponse) => 'handled' | undefined,
   }) {
     const hmrPath = opts?.hmrPath
 
@@ -33,6 +34,8 @@ export class DevServer {
 
     const server = http.createServer((req, res) => {
       const url = req.url!.split('?')[0]!
+
+      if (opts?.onRequest?.(res) === 'handled') return
 
       if (url === hmrPath) {
         res.once('close', () => {
