@@ -1,11 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path/posix'
 
-/**
- * Put files from `LiveTree.files` into `<outDir>/**`
- * 
- * `outDir` defaults to `docs` for GH Pages compatibility.
- */
 export function generateFiles(out: Map<string, Buffer | string>, dry = false, outDir = 'docs') {
   const madeDirs = new Set<string>()
   const mkdirIfNeeded = (dir: string) => {

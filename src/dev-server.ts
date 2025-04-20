@@ -2,11 +2,6 @@ import * as http from "http"
 import * as mimetypes from 'mime-types'
 import * as path from 'path'
 
-/**
- * Simple, robust dev server compatible with LiveTree.
- * 
- * Customizable SSE route and POST event handlers.
- */
 export class DevServer {
 
   public files: Map<string, Buffer | string> | undefined
