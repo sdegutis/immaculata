@@ -1,4 +1,4 @@
-import type { LiveTree } from "./livetree.js"
+import { LiveTree } from "./livetree.js"
 
 class MemFile {
 
@@ -15,8 +15,8 @@ class MemFile {
   set text(s) { this.#text = s }
   textOrContent() { return this.#text ?? this.content }
 
-  copy() {
-    const copy = new MemFile(this.path, this.content)
+  copy(path = this.path) {
+    const copy = new MemFile(path, this.content)
     copy.#text = this.#text
     return copy
   }
@@ -52,8 +52,15 @@ export class Pipeline {
     return this.#filters.every(f => f.regex.test(file.path) === !f.negate)
   }
 
-  add(path: string, content: string | Buffer) {
-    this.#real.push(new MemFile(path, content))
+  add(path: string, content: string | Buffer | MemFile) {
+    this.#real.push(content instanceof MemFile
+      ? content.copy(path)
+      : new MemFile(path, content))
+  }
+
+  graft(prefix: string, files: Pipeline | LiveTree) {
+    if (files instanceof LiveTree) files = Pipeline.from(files.files)
+    files.do(f => this.add(prefix + f.path, f))
   }
 
   del(path: string) {
