@@ -17,7 +17,11 @@ export class DevServer {
   private events = new EventTarget();
   private reloadables = new Set<http.ServerResponse>()
 
-  public constructor(port: number, hmrPath?: string) {
+  public constructor(port: number, opts?: {
+    hmrPath?: string,
+  }) {
+    const hmrPath = opts?.hmrPath
+
     if (hmrPath) {
       this.events.addEventListener('reload', () => {
         for (const client of this.reloadables) {
