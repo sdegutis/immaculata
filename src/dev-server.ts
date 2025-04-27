@@ -7,7 +7,7 @@ export class DevServer {
   public files: Map<string, Buffer | string> | undefined
   public notFound?: (path: string) => string
 
-  public reload = (data: any) => this.events.dispatchEvent(new CustomEvent('reload', { detail: data }))
+  public reload = (data?: any) => this.events.dispatchEvent(new CustomEvent('reload', { detail: data ?? '{}' }))
   private events = new EventTarget();
   private reloadables = new Set<http.ServerResponse>()
 
