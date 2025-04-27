@@ -4,17 +4,27 @@ import { fileURLToPath } from "url"
 
 type ModuleHook = Parameters<typeof registerHooks>[0]
 
-export const markdownModuleHook: ModuleHook = {
+function extRegex(ext: string) {
+  const re = new RegExp(`\\.${ext}(\\?|$)`)
+  return (url: string) => url.match(re)
+}
 
-  load(url, context, nextLoad) {
-    const module = nextLoad(url, context)
-    if (url.match(/\.md(\?|$)/)) {
-      const src = JSON.stringify(module.source?.toString())
-      module.source = `export default ${src}`
-    }
-    return module
-  },
+type StringExportOptions =
+  | { bareExt: string }
+  | { should: (url: string) => boolean }
 
+export function exportAsStringModuleHook(opts: StringExportOptions): ModuleHook {
+  const should = 'should' in opts ? opts.should : extRegex(opts.bareExt)
+  return {
+    load(url, context, nextLoad) {
+      const module = nextLoad(url, context)
+      if (should(url)) {
+        const src = JSON.stringify(module.source?.toString())
+        module.source = `export default ${src}`
+      }
+      return module
+    },
+  }
 }
 
 export const tryTsTsxJsxModuleHook: ModuleHook = {
