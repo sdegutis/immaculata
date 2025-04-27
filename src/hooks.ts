@@ -2,7 +2,9 @@ import { readFileSync } from "fs"
 import type { registerHooks } from "module"
 import { fileURLToPath } from "url"
 
-export const tryTsTsxJsxModuleHook: Parameters<typeof registerHooks>[0] = {
+type ModuleHook = Parameters<typeof registerHooks>[0]
+
+export const tryTsTsxJsxModuleHook: ModuleHook = {
 
   resolve: (spec, ctx, next) => {
 
@@ -26,7 +28,7 @@ export const tryTsTsxJsxModuleHook: Parameters<typeof registerHooks>[0] = {
 
 }
 
-export function compileJsxTsxModuleHook(fn: (src: string, url: string) => string): Parameters<typeof registerHooks>[0] {
+export function compileJsxTsxModuleHook(fn: (src: string, url: string) => string): ModuleHook {
   return {
 
     load: (url, context, next) => {
@@ -51,7 +53,7 @@ export function compileJsxTsxModuleHook(fn: (src: string, url: string) => string
   }
 }
 
-export function jsxRuntimeModuleHook(jsx: string): Parameters<typeof registerHooks>[0] {
+export function jsxRuntimeModuleHook(jsx: string): ModuleHook {
   return {
     resolve: (spec, ctx, next) => {
       if (spec.endsWith('/jsx-runtime')) spec = jsx
