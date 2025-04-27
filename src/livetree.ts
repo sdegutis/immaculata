@@ -120,7 +120,7 @@ export class LiveTree {
   }
 
   public watch(opts?: { ignored?: (path: string) => boolean }, onchange?: (paths: Set<string>) => void) {
-    const updatedPaths = new Set<string>()
+    let updatedPaths = new Set<string>()
     let reloadFsTimer: NodeJS.Timeout
 
     return fs.watch(fileURLToPath(this.root), { recursive: true }, ((type, filePath) => {
@@ -135,7 +135,7 @@ export class LiveTree {
         try {
           this.pathsUpdated(...updatedPaths)
           onchange?.(updatedPaths)
-          updatedPaths.clear()
+          updatedPaths = new Set()
         }
         catch (e) {
           console.error(e)

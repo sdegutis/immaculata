@@ -7,7 +7,7 @@ export class DevServer {
   public files: Map<string, Buffer | string> | undefined
   public notFound?: (path: string) => string
 
-  public reload = () => this.events.dispatchEvent(new Event('reload'))
+  public reload = (data: any) => this.events.dispatchEvent(new CustomEvent('reload', { detail: data }))
   private events = new EventTarget();
   private reloadables = new Set<http.ServerResponse>()
 
@@ -18,10 +18,10 @@ export class DevServer {
     const hmrPath = opts?.hmrPath
 
     if (hmrPath) {
-      this.events.addEventListener('reload', () => {
+      this.events.addEventListener('reload', (e) => {
         for (const client of this.reloadables) {
           console.log('Notifying SSE connection')
-          client.write('data: {}\n\n')
+          client.write(`data: ${JSON.stringify((e as CustomEvent).detail)}\n\n`)
         }
       })
     }
