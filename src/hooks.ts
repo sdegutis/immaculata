@@ -4,6 +4,19 @@ import { fileURLToPath } from "url"
 
 type ModuleHook = Parameters<typeof registerHooks>[0]
 
+export const markdownModuleHook: ModuleHook = {
+
+  load(url, context, nextLoad) {
+    const module = nextLoad(url, context)
+    if (url.match(/\.md(\?|$)/)) {
+      const src = JSON.stringify(module.source?.toString())
+      module.source = `export default ${src}`
+    }
+    return module
+  },
+
+}
+
 export const tryTsTsxJsxModuleHook: ModuleHook = {
 
   resolve: (spec, ctx, next) => {
