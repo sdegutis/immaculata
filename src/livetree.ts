@@ -91,8 +91,16 @@ export class LiveTree {
       if (stat?.isFile()) {
         this.createFile(filepath)
       }
+      else if (stat?.isDirectory()) {
+        this.loadDir(filepath)
+      }
       else {
         this.files.delete(filepath)
+        this.files.keys().forEach(path => {
+          if (path.startsWith(filepath + '/')) {
+            this.files.delete(path)
+          }
+        })
       }
     }
 
