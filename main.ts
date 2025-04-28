@@ -3,14 +3,18 @@ import { compileJsxTsxModuleHook, jsxRuntimeModuleHook, LiveTree, tryTsTsxJsxMod
 import { registerHooks } from 'module'
 
 const tree = new LiveTree('site', import.meta.url)
+tree.files.keys().forEach(k => console.log('key: ', k))
 
-tree.watch({}, () => {
+tree.watch({}, (paths) => {
   console.log('')
   console.log('changed')
-  import('./site/a.js')
+  paths.values().forEach(f => console.log('  ', f))
+
+  tree.files.keys().forEach(k => console.log('key: ', k))
+  // import('./site/a.js')
 })
 
-registerHooks(tree.moduleHook())
+registerHooks(tree.enableImportsModuleHook())
 registerHooks(tryTsTsxJsxModuleHook)
 registerHooks(jsxRuntimeModuleHook('immaculata/dist/jsx-strings.js'))
 registerHooks(compileJsxTsxModuleHook((source, url) => {
@@ -30,4 +34,4 @@ registerHooks(compileJsxTsxModuleHook((source, url) => {
   }).code
 }))
 
-import('./site/a.js')
+// import('./site/a.js')
