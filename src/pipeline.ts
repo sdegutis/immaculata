@@ -29,15 +29,19 @@ export class Pipeline {
 
   static from(files: LiveTree['files']) {
     const initial = [...files.values().map(f => new MemFile(f.path, f.content))]
-    return new Pipeline(initial, [])
+    const pl = new Pipeline()
+    pl.#real = initial
+    return pl
   }
 
-  #real
+  #real: MemFile[] = []
   #filters: Filter[] = []
 
-  private constructor(files: MemFile[], filters: Filter[]) {
-    this.#real = files
-    this.#filters = filters
+  private static create(files: MemFile[], filters: Filter[]) {
+    const pl = new Pipeline()
+    pl.#real = files
+    pl.#filters = filters
+    return pl
   }
 
   all() {
@@ -45,7 +49,7 @@ export class Pipeline {
   }
 
   copy() {
-    return new Pipeline(this.#real.map(f => f.copy()), this.#filters)
+    return Pipeline.create(this.#real.map(f => f.copy()), this.#filters)
   }
 
   #matches(file: MemFile): boolean {
@@ -69,11 +73,11 @@ export class Pipeline {
   }
 
   with(regex: RegExp | string) {
-    return new Pipeline(this.#real, [...this.#filters, { regex: ensureRegex(regex), negate: false }])
+    return Pipeline.create(this.#real, [...this.#filters, { regex: ensureRegex(regex), negate: false }])
   }
 
   without(regex: RegExp | string) {
-    return new Pipeline(this.#real, [...this.#filters, { regex: ensureRegex(regex), negate: true }])
+    return Pipeline.create(this.#real, [...this.#filters, { regex: ensureRegex(regex), negate: true }])
   }
 
   remove() {
