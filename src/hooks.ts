@@ -2,6 +2,16 @@ import { readFileSync } from "fs"
 import type { registerHooks } from "module"
 import { fileURLToPath } from "url"
 
+// Can't remove until
+// https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72580#pullrequestreview-2804640092
+// is addressed
+declare module "module" {
+  export function registerHooks(opts: {
+    load?: (url: string, context: LoadHookContext, nextLoad: (url: string, context?: Partial<LoadHookContext>) => LoadFnOutput) => LoadFnOutput,
+    resolve?: (specifier: string, context: ResolveHookContext, nextResolve: (specifier: string, context?: Partial<ResolveHookContext>) => ResolveFnOutput) => ResolveFnOutput,
+  }): void
+}
+
 type ModuleHook = Parameters<typeof registerHooks>[0]
 
 function extRegex(ext: string) {

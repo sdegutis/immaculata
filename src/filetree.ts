@@ -5,13 +5,6 @@ import { relative } from "path/posix"
 import { fileURLToPath } from "url"
 import { Pipeline } from './pipeline.js'
 
-declare module "module" {
-  export function registerHooks(opts: {
-    load?: (url: string, context: LoadHookContext, nextLoad: (url: string, context?: Partial<LoadHookContext>) => LoadFnOutput) => LoadFnOutput,
-    resolve?: (specifier: string, context: ResolveHookContext, nextResolve: (specifier: string, context?: Partial<ResolveHookContext>) => ResolveFnOutput) => ResolveFnOutput,
-  }): void
-}
-
 export type TreeFile = {
   path: string,
   content: Buffer,
