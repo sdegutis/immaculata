@@ -18,7 +18,7 @@ export const jsx = (tag: string | Function, { children, ...attrs }: Record<strin
   parts.push('<', tag)
   for (const k in attrs) {
     const v = attrs[k]
-    if (v === true)
+    if (v === true || v === '')
       parts.push(' ', k)
     else if (v)
       parts.push(' ', k, '="', v, '"')
