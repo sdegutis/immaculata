@@ -1,6 +1,6 @@
-import { LiveTree } from "./livetree.js"
+import { FileTree } from "./filetree.js"
 
-class MemFile {
+class PipelineFile {
 
   path: string
   content: Buffer
@@ -16,7 +16,7 @@ class MemFile {
   textOrContent() { return this.#text ?? this.content }
 
   copy(path = this.path) {
-    const copy = new MemFile(path, this.content)
+    const copy = new PipelineFile(path, this.content)
     copy.#text = this.#text
     return copy
   }
@@ -27,17 +27,17 @@ type Filter = { regex: RegExp, negate: boolean }
 
 export class Pipeline {
 
-  static from(files: LiveTree['files']) {
-    const initial = [...files.values().map(f => new MemFile(f.path, f.content))]
+  static from(files: FileTree['files']) {
+    const initial = [...files.values().map(f => new PipelineFile(f.path, f.content))]
     const pl = new Pipeline()
     pl.#real = initial
     return pl
   }
 
-  #real: MemFile[] = []
+  #real: PipelineFile[] = []
   #filters: Filter[] = []
 
-  private static create(files: MemFile[], filters: Filter[]) {
+  private static create(files: PipelineFile[], filters: Filter[]) {
     const pl = new Pipeline()
     pl.#real = files
     pl.#filters = filters
@@ -52,18 +52,18 @@ export class Pipeline {
     return Pipeline.create(this.#real.map(f => f.copy()), this.#filters)
   }
 
-  #matches(file: MemFile): boolean {
+  #matches(file: PipelineFile): boolean {
     return this.#filters.every(f => f.regex.test(file.path) === !f.negate)
   }
 
-  add(path: string, content: string | Buffer | MemFile) {
-    this.#real.push(content instanceof MemFile
+  add(path: string, content: string | Buffer | PipelineFile) {
+    this.#real.push(content instanceof PipelineFile
       ? content.copy(path)
-      : new MemFile(path, content))
+      : new PipelineFile(path, content))
   }
 
-  graft(prefix: string, files: Pipeline | LiveTree) {
-    if (files instanceof LiveTree) files = Pipeline.from(files.files)
+  graft(prefix: string, files: Pipeline | FileTree) {
+    if (files instanceof FileTree) files = Pipeline.from(files.files)
     files.do(f => this.add(prefix + f.path, f))
   }
 
@@ -90,11 +90,11 @@ export class Pipeline {
     }
   }
 
-  async doAsync(fn: (file: MemFile) => void | Promise<void>) {
+  async doAsync(fn: (file: PipelineFile) => void | Promise<void>) {
     await Promise.all(this.all().map(fn))
   }
 
-  do(fn: (file: MemFile) => void) {
+  do(fn: (file: PipelineFile) => void) {
     this.all().map(fn)
   }
 

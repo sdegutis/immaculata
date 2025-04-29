@@ -12,19 +12,19 @@ declare module "module" {
   }): void
 }
 
-export type LiveFile = {
+export type TreeFile = {
   path: string,
   content: Buffer,
   version: number,
   requiredBy: (requiredBy: string) => void,
 }
 
-export class LiveTree {
+export class FileTree {
 
   public path: string
   public root: string
 
-  public files = new Map<string, LiveFile>();
+  public files = new Map<string, TreeFile>();
   private deps = new Map<string, Set<string>>();
 
   public constructor(path: string, importMetaUrl: string) {
