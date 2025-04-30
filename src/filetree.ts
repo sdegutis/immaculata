@@ -3,7 +3,6 @@ import { registerHooks } from 'module'
 import * as posix from "path/posix"
 import { relative } from "path/posix"
 import { fileURLToPath } from "url"
-import { Pipeline } from './pipeline.js'
 
 export type TreeFile = {
   path: string,
@@ -24,12 +23,6 @@ export class FileTree {
     this.path = path
     this.root = new URL(this.path, importMetaUrl).href
     this.loadDir('/')
-  }
-
-  public async processFiles(fn: (pipeline: Pipeline) => void | Promise<void>) {
-    const pipeline = Pipeline.from(this.files)
-    await fn(pipeline)
-    return pipeline.results()
   }
 
   private loadDir(base: string) {
