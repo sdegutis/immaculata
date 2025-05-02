@@ -47,7 +47,7 @@ export class FileTree {
 
   private maybeAdd(path: string, stat: fs.Stats) {
     if (stat.isDirectory()) {
-      if (this.rejectDir?.(path + '/', stat)) return
+      if (this.rejectDir?.(path, stat)) return
       this.loadDir(path)
     }
     else if (stat.isFile()) {
