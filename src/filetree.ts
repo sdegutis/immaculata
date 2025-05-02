@@ -11,17 +11,26 @@ export type TreeFile = {
   requiredBy: (requiredBy: string) => void,
 }
 
+type ShouldRejectFile = ((path: string, stat: fs.Stats) => any)
+
 export class FileTree {
 
   public path: string
   public root: string
+  private rejectFile?: ShouldRejectFile | undefined
+  private rejectDir?: ShouldRejectFile | undefined
 
   public files = new Map<string, TreeFile>();
   private deps = new Map<string, Set<string>>();
 
-  public constructor(path: string, importMetaUrl: string) {
+  public constructor(path: string, importMetaUrl: string, opts?: {
+    rejectFile?: ShouldRejectFile,
+    rejectDir?: ShouldRejectFile,
+  }) {
     this.path = path
     this.root = new URL(this.path, importMetaUrl).href
+    this.rejectFile = opts?.rejectFile
+    this.rejectDir = opts?.rejectDir
     this.loadDir('/')
   }
 
@@ -29,16 +38,21 @@ export class FileTree {
     const dirRealPath = this.realPathFor(base)
     const files = fs.readdirSync(dirRealPath)
     for (const name of files) {
+      const normalizedPath = posix.join(base, name)
       const realFilePath = posix.join(dirRealPath, name)
       const stat = fs.statSync(realFilePath)
+      this.maybeAdd(normalizedPath, stat)
+    }
+  }
 
-      if (stat.isDirectory()) {
-        this.loadDir(posix.join(base, name))
-      }
-      else if (stat.isFile()) {
-        const filepath = posix.join(base, name)
-        this.createFile(filepath)
-      }
+  private maybeAdd(path: string, stat: fs.Stats) {
+    if (stat.isDirectory()) {
+      if (this.rejectDir?.(path + '/', stat)) return
+      this.loadDir(path)
+    }
+    else if (stat.isFile()) {
+      if (this.rejectFile?.(path, stat)) return
+      this.createFile(path)
     }
   }
 
@@ -74,11 +88,8 @@ export class FileTree {
       const realPath = this.realPathFor(filepath)
       const stat = fs.existsSync(realPath) ? fs.statSync(realPath) : undefined
 
-      if (stat?.isFile()) {
-        this.createFile(filepath)
-      }
-      else if (stat?.isDirectory()) {
-        this.loadDir(filepath)
+      if (stat) {
+        this.maybeAdd(filepath, stat)
       }
       else {
         this.files.delete(filepath)
