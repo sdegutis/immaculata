@@ -113,9 +113,14 @@ export class FileTree {
     }
   }
 
-  public watch(opts?: { ignored?: (path: string) => boolean }, onchange?: (paths: Set<string>) => void) {
+  public watch(opts?: {
+    ignored?: (path: string) => boolean
+    debounceMs?: number
+  }, onchange?: (paths: Set<string>) => void) {
     let updatedPaths = new Set<string>()
     let reloadFsTimer: NodeJS.Timeout
+
+    const debounce = opts?.debounceMs ?? 100
 
     return fs.watch(fileURLToPath(this.root), { recursive: true }, ((type, filePath) => {
       if (!filePath) return
@@ -134,7 +139,7 @@ export class FileTree {
         catch (e) {
           console.error(e)
         }
-      }, 100)
+      }, debounce)
     }))
   }
 
