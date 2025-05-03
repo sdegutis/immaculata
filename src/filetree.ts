@@ -116,8 +116,8 @@ export class FileTree {
     }
 
     const resetSeen = new Set<string>()
-    for (const filepath of paths) {
-      this.resetDepTree(filepath, resetSeen)
+    for (const change of changes) {
+      this.resetDepTree(change.path, resetSeen)
     }
 
     return changes
