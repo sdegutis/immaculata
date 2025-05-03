@@ -69,10 +69,7 @@ export class FileTree {
 
     const version = Date.now()
     this.deleteFromCache(path)
-    const requiredBy = (by: string) => {
-      if (by.startsWith('file://')) by = by.slice(this.root.length)
-      this.addDep(by, path)
-    }
+    const requiredBy = (by: string) => this.addDependency(by, path)
     this.files.set(path, { path, content, version, requiredBy })
   }
 
@@ -85,7 +82,8 @@ export class FileTree {
     return fileURLToPath(new URL(filepath.slice(1), this.root + '/'))
   }
 
-  private addDep(requiredBy: string, requiring: string) {
+  public addDependency(requiredBy: string, requiring: string) {
+    if (requiredBy.startsWith('file://')) requiredBy = requiredBy.slice(this.root.length)
     requiredBy = requiredBy.replace(/\?ver=\d+$/, '')
     let list = this.deps.get(requiring)
     if (!list) this.deps.set(requiring, list = new Set())
@@ -183,7 +181,7 @@ export class FileTree {
         if (context.parentURL?.startsWith(this.root) && !context.parentURL.endsWith('/noop.js')) {
           const depending = context.parentURL.slice(this.root.length)
           const depended = path.slice(this.root.length)
-          this.addDep(depending, depended)
+          this.addDependency(depending, depended)
         }
 
         const newurl = new URL('.' + found.path, this.root + '/')
