@@ -11,23 +11,23 @@ export type TreeFile = {
   requiredBy: (requiredBy: string) => void,
 }
 
-type ShouldRejectFile = ((path: string, stat: fs.Stats) => any)
+type ShouldExcludeFile = ((path: string, stat: fs.Stats) => any)
 
 export class FileTree {
 
   public path: string
   public root: string
-  private reject?: ShouldRejectFile | undefined
+  private exclude?: ShouldExcludeFile | undefined
 
   public files = new Map<string, TreeFile>();
   private deps = new Map<string, Set<string>>();
 
   public constructor(path: string, importMetaUrl: string, opts?: {
-    reject?: ShouldRejectFile,
+    exclude?: ShouldExcludeFile,
   }) {
     this.path = path
     this.root = new URL(this.path, importMetaUrl).href.replace(/\/+$/, '')
-    this.reject = opts?.reject
+    this.exclude = opts?.exclude
     this.loadDir('/')
   }
 
@@ -44,11 +44,11 @@ export class FileTree {
 
   private maybeAdd(path: string, stat: fs.Stats) {
     if (stat.isDirectory()) {
-      if (this.reject?.(path + '/', stat)) return
+      if (this.exclude?.(path + '/', stat)) return
       this.loadDir(path)
     }
     else if (stat.isFile()) {
-      if (this.reject?.(path, stat)) return
+      if (this.exclude?.(path, stat)) return
       this.createFile(path)
     }
   }
