@@ -12,7 +12,7 @@ export type TreeFile = {
 }
 
 export type ShouldExcludeFile = ((path: string, stat: fs.Stats) => any)
-export type FileTreeChange = { path: string, change: 'add' | 'change' | 'rem' }
+export type FileTreeChange = { path: string, change: 'add' | 'dif' | 'rem' }
 
 export class FileTree {
 
@@ -61,7 +61,7 @@ export class FileTree {
       if (content.equals(existing.content)) {
         return
       }
-      changes?.push({ path, change: 'change' })
+      changes?.push({ path, change: 'dif' })
     }
     else {
       changes?.push({ path, change: 'add' })
