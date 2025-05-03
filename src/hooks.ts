@@ -25,7 +25,7 @@ type StringExportOptions =
   | { bareExt: string }
   | { should: (url: string) => boolean }
 
-export function exportAsStringModuleHook(opts: StringExportOptions): ModuleHook {
+export function exportAsString(opts: StringExportOptions): ModuleHook {
   const should = 'should' in opts ? opts.should : extRegex(opts.bareExt)
   return {
     load(url, context, nextLoad) {
@@ -39,7 +39,7 @@ export function exportAsStringModuleHook(opts: StringExportOptions): ModuleHook 
   }
 }
 
-export const tryTsTsxJsxModuleHook: ModuleHook = {
+export const tryAltExts: ModuleHook = {
 
   resolve: (spec, ctx, next) => {
 
@@ -63,7 +63,7 @@ export const tryTsTsxJsxModuleHook: ModuleHook = {
 
 }
 
-export function compileJsxTsxModuleHook(fn: (src: string, url: string) => string): ModuleHook {
+export function compileJsx(fn: (src: string, url: string) => string): ModuleHook {
   return {
 
     load: (url, context, next) => {
@@ -88,16 +88,16 @@ export function compileJsxTsxModuleHook(fn: (src: string, url: string) => string
   }
 }
 
-export function jsxRuntimeModuleHook(jsx: string): ModuleHook {
+export function mapImport(from: string, to: string): ModuleHook {
   return {
     resolve: (spec, ctx, next) => {
-      if (spec.endsWith('/jsx-runtime')) spec = jsx
+      if (spec === from) spec = to
       return next(spec, ctx)
     }
   }
 }
 
-export function enableImportsModuleHook(tree: FileTree): Parameters<typeof registerHooks>[0] {
+export function useTree(tree: FileTree): Parameters<typeof registerHooks>[0] {
   return {
 
     resolve: (spec, context, next) => {
