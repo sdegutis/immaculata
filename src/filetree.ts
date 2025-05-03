@@ -11,7 +11,7 @@ export type TreeFile = {
   requiredBy: (requiredBy: string) => void,
 }
 
-export type ShouldExcludeFile = ((path: string, stat: fs.Stats) => any)
+export type ShouldExcludeFile = (path: string, stat: fs.Stats) => any
 export type FileTreeChange = { path: string, change: 'add' | 'dif' | 'rem' }
 
 export class FileTree {
