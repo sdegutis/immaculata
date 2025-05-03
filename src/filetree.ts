@@ -1,7 +1,5 @@
 import * as fs from "fs"
-import { registerHooks } from 'module'
 import * as posix from "path/posix"
-import { relative } from "path/posix"
 import { fileURLToPath } from "url"
 
 export type TreeFile = {
@@ -168,49 +166,6 @@ export class FileTree {
         }
       }, debounce)
     }))
-  }
-
-  public enableImportsModuleHook(): Parameters<typeof registerHooks>[0] {
-    return {
-
-      resolve: (spec, context, next) => {
-        if (!spec.match(/^(\.|\/|file:\/\/\/)/)) return next(spec, context)
-
-        let path = new URL(spec, context.parentURL).href
-        if (!path.startsWith(this.root)) return next(spec, context)
-
-        const found = this.files.get('/' + relative(this.root, path))
-        if (!found) return next(spec, context)
-
-        if (context.parentURL?.startsWith(this.root) && !context.parentURL.endsWith('/noop.js')) {
-          const depending = context.parentURL.slice(this.root.length)
-          const depended = path.slice(this.root.length)
-          this.addDependency(depending, depended)
-        }
-
-        const newurl = new URL('.' + found.path, this.root + '/')
-        newurl.search = `ver=${found.version}`
-
-        return { url: newurl.href, shortCircuit: true }
-      },
-
-      load: (url, context, next) => {
-        if (url.startsWith(this.root)) {
-          url = url.replace(/\?ver=\d+$/, '')
-
-          const found = this.files.get(url.slice(this.root.length))
-          if (!found) return next(url, context)
-
-          return {
-            shortCircuit: true,
-            format: found.path.match(/\.tsx?(\?|$)/) ? 'module-typescript' : 'module',
-            source: found.content,
-          }
-        }
-        return next(url, context)
-      }
-
-    }
   }
 
 }

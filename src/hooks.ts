@@ -1,6 +1,8 @@
 import { readFileSync } from "fs"
 import type { registerHooks } from "module"
+import { relative } from "path/posix"
 import { fileURLToPath } from "url"
+import type { FileTree } from "./filetree.js"
 
 // Can't remove until
 // https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72580#pullrequestreview-2804640092
@@ -92,5 +94,48 @@ export function jsxRuntimeModuleHook(jsx: string): ModuleHook {
       if (spec.endsWith('/jsx-runtime')) spec = jsx
       return next(spec, ctx)
     }
+  }
+}
+
+export function enableImportsModuleHook(tree: FileTree): Parameters<typeof registerHooks>[0] {
+  return {
+
+    resolve: (spec, context, next) => {
+      if (!spec.match(/^(\.|\/|file:\/\/\/)/)) return next(spec, context)
+
+      let path = new URL(spec, context.parentURL).href
+      if (!path.startsWith(tree.root)) return next(spec, context)
+
+      const found = tree.files.get('/' + relative(tree.root, path))
+      if (!found) return next(spec, context)
+
+      if (context.parentURL?.startsWith(tree.root) && !context.parentURL.endsWith('/noop.js')) {
+        const depending = context.parentURL.slice(tree.root.length)
+        const depended = path.slice(tree.root.length)
+        tree.addDependency(depending, depended)
+      }
+
+      const newurl = new URL('.' + found.path, tree.root + '/')
+      newurl.search = `ver=${found.version}`
+
+      return { url: newurl.href, shortCircuit: true }
+    },
+
+    load: (url, context, next) => {
+      if (url.startsWith(tree.root)) {
+        url = url.replace(/\?ver=\d+$/, '')
+
+        const found = tree.files.get(url.slice(tree.root.length))
+        if (!found) return next(url, context)
+
+        return {
+          shortCircuit: true,
+          format: found.path.match(/\.tsx?(\?|$)/) ? 'module-typescript' : 'module',
+          source: found.content,
+        }
+      }
+      return next(url, context)
+    }
+
   }
 }
