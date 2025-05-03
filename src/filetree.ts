@@ -12,6 +12,7 @@ export type TreeFile = {
 }
 
 type ShouldExcludeFile = ((path: string, stat: fs.Stats) => any)
+type Change = { path: string, change: 'add' | 'change' | 'rem' }
 
 export class FileTree {
 
@@ -31,30 +32,41 @@ export class FileTree {
     this.loadDir('/')
   }
 
-  private loadDir(base: string) {
+  private loadDir(base: string, changes?: Change[]) {
     const dirRealPath = this.realPathFor(base)
     const files = fs.readdirSync(dirRealPath)
     for (const name of files) {
       const normalizedPath = posix.join(base, name)
       const realFilePath = posix.join(dirRealPath, name)
       const stat = fs.statSync(realFilePath)
-      this.maybeAdd(normalizedPath, stat)
+      this.maybeAdd(normalizedPath, stat, changes)
     }
   }
 
-  private maybeAdd(path: string, stat: fs.Stats) {
+  private maybeAdd(path: string, stat: fs.Stats, changes?: Change[]) {
     if (stat.isDirectory()) {
       if (this.exclude?.(path + '/', stat)) return
-      this.loadDir(path)
+      this.loadDir(path, changes)
     }
     else if (stat.isFile()) {
       if (this.exclude?.(path, stat)) return
-      this.createFile(path)
+      this.createFile(path, changes)
     }
   }
 
-  private createFile(path: string) {
+  private createFile(path: string, changes?: Change[]) {
     const content = fs.readFileSync(this.realPathFor(path))
+    const existing = this.files.get(path)
+    if (existing) {
+      if (content.equals(existing.content)) {
+        return
+      }
+      changes?.push({ path, change: 'change' })
+    }
+    else {
+      changes?.push({ path, change: 'add' })
+    }
+
     const version = Date.now()
     this.deleteFromCache(path)
     const requiredBy = (by: string) => {
@@ -81,17 +93,22 @@ export class FileTree {
   }
 
   private pathsUpdated(...paths: string[]) {
+    const changes: Change[] = []
+
     for (const filepath of paths) {
       const realPath = this.realPathFor(filepath)
       const stat = fs.existsSync(realPath) ? fs.statSync(realPath) : undefined
 
       if (stat) {
-        this.maybeAdd(filepath, stat)
+        this.maybeAdd(filepath, stat, changes)
       }
       else {
-        this.files.delete(filepath)
+        if (this.files.delete(filepath)) {
+          changes.push({ path: filepath, change: 'rem' })
+        }
         this.files.keys().forEach(path => {
           if (path.startsWith(filepath + '/')) {
+            changes.push({ path, change: 'rem' })
             this.files.delete(path)
           }
         })
@@ -102,6 +119,8 @@ export class FileTree {
     for (const filepath of paths) {
       this.resetDepTree(filepath, resetSeen)
     }
+
+    return changes
   }
 
   private resetDepTree(path: string, seen: Set<string>) {
@@ -122,9 +141,8 @@ export class FileTree {
   }
 
   public watch(opts?: {
-    ignored?: (path: string) => boolean
     debounceMs?: number
-  }, onchange?: (paths: Set<string>) => void) {
+  }, onChanges?: (changes: Change[]) => void) {
     let updatedPaths = new Set<string>()
     let reloadFsTimer: NodeJS.Timeout
 
@@ -134,14 +152,13 @@ export class FileTree {
       if (!filePath) return
       const normalized = '/' + filePath.split(posix.win32.sep).join(posix.posix.sep)
 
-      if (opts?.ignored?.(normalized)) return
       updatedPaths.add(normalized)
 
       clearTimeout(reloadFsTimer)
       reloadFsTimer = setTimeout(async () => {
         try {
-          this.pathsUpdated(...updatedPaths)
-          onchange?.(updatedPaths)
+          const changes = this.pathsUpdated(...updatedPaths)
+          onChanges?.(changes)
           updatedPaths = new Set()
         }
         catch (e) {
