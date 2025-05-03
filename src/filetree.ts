@@ -16,7 +16,10 @@ export type FileTreeChange = { path: string, change: 'add' | 'dif' | 'rem' }
 
 export class FileTree {
 
+  /** The exact argument passed to constructor */
   public path: string
+
+  /** The full file URL. Never ends with `'/'` */
   public root: string
   private exclude?: ShouldExcludeFile | undefined
 
