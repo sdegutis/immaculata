@@ -85,6 +85,7 @@ export class FileTree {
     return fileURLToPath(new URL(filepath.slice(1), this.root + '/'))
   }
 
+  /** Makes changes to file at `requiring` invalidate module at `requiredBy` */
   public addDependency(requiredBy: string, requiring: string) {
     if (requiredBy.startsWith('file://')) requiredBy = requiredBy.slice(this.root.length)
     requiredBy = requiredBy.replace(/\?ver=\d+$/, '')
