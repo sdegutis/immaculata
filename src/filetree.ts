@@ -158,7 +158,7 @@ export class FileTree {
       reloadFsTimer = setTimeout(async () => {
         try {
           const changes = this.pathsUpdated(...updatedPaths)
-          onChanges?.(changes)
+          if (changes.length > 0) onChanges?.(changes)
           updatedPaths = new Set()
         }
         catch (e) {
