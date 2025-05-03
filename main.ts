@@ -1,8 +1,8 @@
 import { transformSync } from '@swc/core'
-import { compileJsxTsxModuleHook, jsxRuntimeModuleHook, LiveTree, tryTsTsxJsxModuleHook } from 'immaculata'
+import { compileJsxTsxModuleHook, FileTree, jsxRuntimeModuleHook, tryTsTsxJsxModuleHook } from 'immaculata'
 import { registerHooks } from 'module'
 
-const tree = new LiveTree('site', import.meta.url)
+const tree = new FileTree('site', import.meta.url)
 tree.files.keys().forEach(k => console.log('key: ', k))
 
 tree.watch({}, (paths) => {
@@ -10,7 +10,7 @@ tree.watch({}, (paths) => {
   console.log('changed')
   paths.values().forEach(f => console.log('  ', f))
 
-  tree.files.keys().forEach(k => console.log('key: ', k))
+  tree.files.keys().forEach(k => console.log('key2: ', k))
   // import('./site/a.js')
 })
 
