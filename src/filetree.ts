@@ -11,8 +11,8 @@ export type TreeFile = {
   requiredBy: (requiredBy: string) => void,
 }
 
-type ShouldExcludeFile = ((path: string, stat: fs.Stats) => any)
-type Change = { path: string, change: 'add' | 'change' | 'rem' }
+export type ShouldExcludeFile = ((path: string, stat: fs.Stats) => any)
+export type FileTreeChange = { path: string, change: 'add' | 'change' | 'rem' }
 
 export class FileTree {
 
@@ -32,7 +32,7 @@ export class FileTree {
     this.loadDir('/')
   }
 
-  private loadDir(base: string, changes?: Change[]) {
+  private loadDir(base: string, changes?: FileTreeChange[]) {
     const dirRealPath = this.realPathFor(base)
     const files = fs.readdirSync(dirRealPath)
     for (const name of files) {
@@ -43,7 +43,7 @@ export class FileTree {
     }
   }
 
-  private maybeAdd(path: string, stat: fs.Stats, changes?: Change[]) {
+  private maybeAdd(path: string, stat: fs.Stats, changes?: FileTreeChange[]) {
     if (stat.isDirectory()) {
       if (this.exclude?.(path + '/', stat)) return
       this.loadDir(path, changes)
@@ -54,7 +54,7 @@ export class FileTree {
     }
   }
 
-  private createFile(path: string, changes?: Change[]) {
+  private createFile(path: string, changes?: FileTreeChange[]) {
     const content = fs.readFileSync(this.realPathFor(path))
     const existing = this.files.get(path)
     if (existing) {
@@ -93,7 +93,7 @@ export class FileTree {
   }
 
   private pathsUpdated(...paths: string[]) {
-    const changes: Change[] = []
+    const changes: FileTreeChange[] = []
 
     for (const filepath of paths) {
       const realPath = this.realPathFor(filepath)
@@ -142,7 +142,7 @@ export class FileTree {
 
   public watch(opts?: {
     debounceMs?: number
-  }, onChanges?: (changes: Change[]) => void) {
+  }, onChanges?: (changes: FileTreeChange[]) => void) {
     let updatedPaths = new Set<string>()
     let reloadFsTimer: NodeJS.Timeout
 
