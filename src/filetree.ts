@@ -17,20 +17,17 @@ export class FileTree {
 
   public path: string
   public root: string
-  private rejectFile?: ShouldRejectFile | undefined
-  private rejectDir?: ShouldRejectFile | undefined
+  private reject?: ShouldRejectFile | undefined
 
   public files = new Map<string, TreeFile>();
   private deps = new Map<string, Set<string>>();
 
   public constructor(path: string, importMetaUrl: string, opts?: {
-    rejectFile?: ShouldRejectFile,
-    rejectDir?: ShouldRejectFile,
+    reject?: ShouldRejectFile,
   }) {
     this.path = path
-    this.root = new URL(this.path, importMetaUrl).href
-    this.rejectFile = opts?.rejectFile
-    this.rejectDir = opts?.rejectDir
+    this.root = new URL(this.path, importMetaUrl).href.replace(/\/+$/, '')
+    this.reject = opts?.reject
     this.loadDir('/')
   }
 
@@ -47,11 +44,11 @@ export class FileTree {
 
   private maybeAdd(path: string, stat: fs.Stats) {
     if (stat.isDirectory()) {
-      if (this.rejectDir?.(path, stat)) return
+      if (this.reject?.(path + '/', stat)) return
       this.loadDir(path)
     }
     else if (stat.isFile()) {
-      if (this.rejectFile?.(path, stat)) return
+      if (this.reject?.(path, stat)) return
       this.createFile(path)
     }
   }
