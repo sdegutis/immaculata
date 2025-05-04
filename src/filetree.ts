@@ -165,7 +165,7 @@ export class FileTree {
         reloadFsTimer = setTimeout(async () => {
           try {
             const changes = this.pathsUpdated(...updatedPaths)
-            if (changes.length > 0) fsevents.emit('change', changes)
+            if (changes.length > 0) fsevents.emit('filesUpdated', changes)
             updatedPaths = new Set()
           }
           catch (e) {
