@@ -144,7 +144,7 @@ export class FileTree {
   }
 
   private fsevents?: EventEmitter<{
-    change: [changes: FileTreeChange[]],
+    filesUpdated: [changes: FileTreeChange[]],
     moduleInvalidated: [path: string],
   }>
 
