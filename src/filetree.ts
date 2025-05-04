@@ -70,14 +70,16 @@ export class FileTree {
     }
 
     const version = Date.now()
-    this.deleteFromCache(path)
+    this.invalidateModule(path)
     const requiredBy = (by: string) => this.addDependency(by, path)
     this.files.set(path, { path, content, version, requiredBy })
   }
 
-  private deleteFromCache(path: string) {
-    // No way to do this yet
+  private invalidateModule(path: string) {
+    // No way to delete it from module cache yet
     // See https://github.com/nodejs/node/issues/57696
+
+    this.fsevents?.emit('moduleInvalidated', path)
   }
 
   private realPathFor(filepath: string) {
@@ -134,7 +136,7 @@ export class FileTree {
         for (const dep of requiredBy) {
           const file = this.files.get(dep)!
           file.version = Date.now()
-          this.deleteFromCache(dep)
+          this.invalidateModule(dep)
           this.resetDepTree(dep, seen)
         }
       }
@@ -142,7 +144,8 @@ export class FileTree {
   }
 
   private fsevents?: EventEmitter<{
-    change: [changes: FileTreeChange[]]
+    change: [changes: FileTreeChange[]],
+    moduleInvalidated: [path: string],
   }>
 
   public watch(debounce = 100) {
