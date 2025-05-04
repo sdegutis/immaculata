@@ -16,8 +16,8 @@ tree.watch().on('filesUpdated', () => {
   import('./site/a.js')
 })
 
-// tree.watch().on('change', (changes) => { console.log('changes1', changes) })
-// tree.watch().on('change', (changes) => { console.log('changes2', changes) })
+tree.watch().on('filesUpdated', (changes) => { console.log('changes1', changes) })
+tree.watch().on('filesUpdated', (changes) => { console.log('changes2', changes) })
 
 registerHooks(hooks.useTree(tree))
 
