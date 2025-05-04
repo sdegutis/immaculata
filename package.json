@@ -8,6 +8,6 @@
   },
   "type": "module",
   "dependencies": {
-    "immaculata": "^1.2.0"
+    "immaculata": "^2.0.0"
   }
 }

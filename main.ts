@@ -1,18 +1,24 @@
-import { FileTree, hooks } from 'immaculata'
+import { hooks } from 'immaculata'
 import { tryAltExts } from 'immaculata/hooks.js'
 import { registerHooks } from 'module'
 import ts from 'typescript'
 import { fileURLToPath } from 'url'
+import { tree } from './tree.ts'
 
-const tree = new FileTree('site', import.meta.url)
 tree.files.keys().forEach(k => console.log('key: ', k))
 
+// tree.onModuleInvalidated('/a.js', () => { console.log('INVALIDATED a') })
+// tree.onModuleInvalidated('/b.tsx', () => { console.log('INVALIDATED a') })
 
 tree.watch().on('moduleInvalidated', path => {
   console.log('gone', path)
 })
 
 tree.watch().on('filesUpdated', () => {
+
+  // tree.onModuleInvalidated('/a.js', () => { console.log('INVALIDATED a') })
+  // tree.onModuleInvalidated('/b.tsx', () => { console.log('INVALIDATED b') })
+
   import('./site/a.js')
 })
 
