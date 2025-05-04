@@ -1,2 +1,3 @@
 export const b: number = 2344
-console.log('in b', b, <foo />)
+console.log('in b', b, <foo bar={2} />)
+

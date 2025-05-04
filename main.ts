@@ -1,45 +1,49 @@
-import { transformSync } from '@swc/core'
-import { compileJsxTsxModuleHook, FileTree, jsxRuntimeModuleHook, tryTsTsxJsxModuleHook } from 'immaculata'
+import { FileTree, hooks } from 'immaculata'
+import { tryAltExts } from 'immaculata/hooks.js'
 import { registerHooks } from 'module'
+import ts from 'typescript'
+import { fileURLToPath } from 'url'
 
-const tree = new FileTree('.', import.meta.url, {
-  exclude: (path) => {
-    if (path.includes('/.git/')) return true
-    if (path.includes('/node_modules/')) return true
-
-    return false
-  }
-})
+const tree = new FileTree('site', import.meta.url)
 tree.files.keys().forEach(k => console.log('key: ', k))
 
-tree.watch({}, (paths) => {
-  console.log('')
-  console.log('changed')
-  // paths.values().forEach(f => console.log('  ', f.change, f.path))
 
-  // tree.files.keys().forEach(k => console.log('key2: ', k))
+tree.watch().on('moduleInvalidated', path => {
+  console.log('gone', path)
+})
+
+tree.watch().on('filesUpdated', () => {
   import('./site/a.js')
 })
 
-registerHooks(tree.enableImportsModuleHook())
-registerHooks(tryTsTsxJsxModuleHook)
-registerHooks(jsxRuntimeModuleHook(tree.root + '/site/reactlike.ts'))
-// registerHooks(jsxRuntimeModuleHook('immaculata/dist/jsx-strings.js'))
-registerHooks(compileJsxTsxModuleHook((source, url) => {
-  return transformSync(source, {
-    isModule: true,
-    sourceMaps: 'inline',
-    jsc: {
-      keepClassNames: true,
-      target: 'esnext',
-      parser: url.match(/\.tsx(\?|$)/)
-        ? { syntax: 'typescript', tsx: true, decorators: true }
-        : { syntax: 'ecmascript', jsx: true, decorators: true },
-      transform: {
-        react: { runtime: 'automatic', },
-      },
-    },
-  }).code
+// tree.watch().on('change', (changes) => { console.log('changes1', changes) })
+// tree.watch().on('change', (changes) => { console.log('changes2', changes) })
+
+registerHooks(hooks.useTree(tree))
+
+registerHooks(hooks.mapImport(
+  'react/jsx-runtime',
+  tree.root + '/myreact.ts'))
+
+registerHooks(hooks.mapImport(
+  'react/jsx-runtime',
+  'immaculata/jsx-strings.js'))
+
+registerHooks(tryAltExts)
+
+registerHooks(hooks.compileJsx((str, url) => {
+  return ts.transpileModule(str, {
+    fileName: fileURLToPath(url),
+    compilerOptions: {
+      target: ts.ScriptTarget.ESNext,
+      module: ts.ModuleKind.ESNext,
+      jsx: ts.JsxEmit.ReactJSX,
+      sourceMap: true,
+      inlineSourceMap: true,
+      inlineSources: true,
+    }
+  }).outputText
 }))
 
 import('./site/a.js')
+
