@@ -23,7 +23,6 @@ export class FileTree {
   private exclude?: ShouldExcludeFile | undefined
 
   public files = new Map<string, TreeFile>();
-  private deps = new Map<string, Set<string>>();
 
   public constructor(path: string, importMetaUrl: string, opts?: {
     exclude?: ShouldExcludeFile,
@@ -95,6 +94,8 @@ export class FileTree {
   private realPathFor(filepath: string) {
     return fileURLToPath(new URL(filepath.slice(1), this.root + '/'))
   }
+
+  private deps = new Map<string, Set<string>>();
 
   /** Makes changes to file at `requiring` invalidate module at `requiredBy` */
   public addDependency(requiredBy: string, requiring: string) {
