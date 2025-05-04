@@ -150,14 +150,14 @@ export class FileTree {
 
   public watch(debounce = 100) {
     if (!this.fsevents) {
-      let updatedPaths = new Set<string>()
-      let reloadFsTimer: NodeJS.Timeout
-
       const fsevents = this.fsevents = new EventEmitter()
 
-      fs.watch(fileURLToPath(this.root), { recursive: true }, ((type, filePath) => {
-        if (!filePath) return
-        const normalized = '/' + filePath.split(posix.win32.sep).join(posix.posix.sep)
+      const updatedPaths = new Set<string>()
+      let reloadFsTimer: NodeJS.Timeout
+
+      fs.watch(fileURLToPath(this.root), { recursive: true }, ((type, filename) => {
+        if (!filename) return
+        const normalized = '/' + filename.split(posix.win32.sep).join(posix.posix.sep)
 
         updatedPaths.add(normalized)
 
@@ -166,7 +166,7 @@ export class FileTree {
           try {
             const changes = this.pathsUpdated(...updatedPaths)
             if (changes.length > 0) fsevents.emit('filesUpdated', changes)
-            updatedPaths = new Set()
+            updatedPaths.clear()
           }
           catch (e) {
             console.error(e)
