@@ -1,7 +1,10 @@
 {
   "name": "immaculata",
   "version": "1.2.0",
-  "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./*.js": "./dist/*.js"
+  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch"
@@ -11,7 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/thesoftwarephilosopher/immaculata.git"
   },
-  "keywords": [],
+  "keywords": [ ],
   "author": "@thesoftwarephilosopher",
   "description": "Simple TypeScript/JSX SSG",
   "bugs": {
