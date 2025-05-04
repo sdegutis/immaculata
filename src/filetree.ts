@@ -1,3 +1,4 @@
+import { EventEmitter } from "events"
 import * as fs from "fs"
 import * as posix from "path/posix"
 import { fileURLToPath } from "url"
@@ -140,32 +141,38 @@ export class FileTree {
     }
   }
 
-  public watch(opts?: {
-    debounceMs?: number
-  }, onChanges?: (changes: FileTreeChange[]) => void) {
-    let updatedPaths = new Set<string>()
-    let reloadFsTimer: NodeJS.Timeout
+  private fsevents?: EventEmitter<{
+    change: [changes: FileTreeChange[]]
+  }>
 
-    const debounce = opts?.debounceMs ?? 100
+  public watch(debounce = 100) {
+    if (!this.fsevents) {
+      let updatedPaths = new Set<string>()
+      let reloadFsTimer: NodeJS.Timeout
 
-    return fs.watch(fileURLToPath(this.root), { recursive: true }, ((type, filePath) => {
-      if (!filePath) return
-      const normalized = '/' + filePath.split(posix.win32.sep).join(posix.posix.sep)
+      const fsevents = this.fsevents = new EventEmitter()
 
-      updatedPaths.add(normalized)
+      fs.watch(fileURLToPath(this.root), { recursive: true }, ((type, filePath) => {
+        if (!filePath) return
+        const normalized = '/' + filePath.split(posix.win32.sep).join(posix.posix.sep)
 
-      clearTimeout(reloadFsTimer)
-      reloadFsTimer = setTimeout(async () => {
-        try {
-          const changes = this.pathsUpdated(...updatedPaths)
-          if (changes.length > 0) onChanges?.(changes)
-          updatedPaths = new Set()
-        }
-        catch (e) {
-          console.error(e)
-        }
-      }, debounce)
-    }))
+        updatedPaths.add(normalized)
+
+        clearTimeout(reloadFsTimer)
+        reloadFsTimer = setTimeout(async () => {
+          try {
+            const changes = this.pathsUpdated(...updatedPaths)
+            if (changes.length > 0) fsevents.emit('change', changes)
+            updatedPaths = new Set()
+          }
+          catch (e) {
+            console.error(e)
+          }
+        }, debounce)
+      }))
+    }
+
+    return this.fsevents
   }
 
 }
