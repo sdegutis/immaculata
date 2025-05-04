@@ -75,11 +75,21 @@ export class FileTree {
     this.files.set(path, { path, content, version, requiredBy })
   }
 
+  private moduleInvalidated = new EventEmitter()
+
   private invalidateModule(path: string) {
     // No way to delete it from module cache yet
     // See https://github.com/nodejs/node/issues/57696
 
     this.fsevents?.emit('moduleInvalidated', path)
+    this.moduleInvalidated.emit(path)
+  }
+
+  onModuleInvalidated(path: string, fn: () => void) {
+    if (path.startsWith(this.root)) path = path.slice(this.root.length)
+    path = path.replace(/\?.+/, '')
+
+    this.moduleInvalidated.once(path, fn)
   }
 
   private realPathFor(filepath: string) {
