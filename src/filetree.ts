@@ -84,11 +84,10 @@ export class FileTree {
     this.moduleInvalidated.emit(path)
   }
 
-  onModuleInvalidated(path: string, fn: () => void) {
-    if (path.startsWith(this.root)) path = path.slice(this.root.length)
-    path = path.replace(/\?.+/, '')
-
-    this.moduleInvalidated.once(path, fn)
+  /** Requires `useTree` hook. Must be called from within module passing `import.meta.url`. */
+  onModuleInvalidated(importMetaUrl: string, fn: () => void) {
+    importMetaUrl = importMetaUrl.slice(this.root.length).replace(/\?.+/, '')
+    this.moduleInvalidated.once(importMetaUrl, fn)
   }
 
   private realPathFor(filepath: string) {
