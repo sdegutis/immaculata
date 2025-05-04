@@ -1,3 +1,4 @@
+import { EventEmitter } from "events"
 import * as http from "http"
 import * as mimetypes from 'mime-types'
 import * as path from 'path'
@@ -7,8 +8,8 @@ export class DevServer {
   public files: Map<string, Buffer | string> | undefined
   public notFound?: (path: string) => string
 
-  public reload = (data?: any) => this.events.dispatchEvent(new CustomEvent('reload', { detail: data ?? '{}' }))
-  private events = new EventTarget();
+  public reload = (data?: any) => this.events.emit('reload', data ?? {})
+  private events = new EventEmitter<{ reload: [data: any] }>();
   private reloadables = new Set<http.ServerResponse>()
 
   public constructor(port: number, opts?: {
@@ -18,10 +19,10 @@ export class DevServer {
     const hmrPath = opts?.hmrPath
 
     if (hmrPath) {
-      this.events.addEventListener('reload', (e) => {
+      this.events.on('reload', (data) => {
         for (const client of this.reloadables) {
           console.log('Notifying SSE connection')
-          client.write(`data: ${JSON.stringify((e as CustomEvent).detail)}\n\n`)
+          client.write(`data: ${JSON.stringify(data)}\n\n`)
         }
       })
     }
