@@ -85,7 +85,7 @@ export class FileTree {
   }
 
   /** Requires `useTree` hook. Must be called from within module passing `import.meta.url`. */
-  onModuleInvalidated(importMetaUrl: string, fn: () => void) {
+  public onModuleInvalidated(importMetaUrl: string, fn: () => void) {
     this.moduleInvalidated.once(importMetaUrl.slice(this.root.length).replace(/\?.+/, ''), fn)
   }
 
