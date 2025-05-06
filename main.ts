@@ -11,10 +11,12 @@ tree.files.keys().forEach(k => console.log('key: ', k))
 // tree.onModuleInvalidated('/b.tsx', () => { console.log('INVALIDATED a') })
 
 tree.watch().on('moduleInvalidated', path => {
-  console.log('gone', path)
+  console.log('moduleInvalidated', path)
 })
 
 tree.watch().on('filesUpdated', () => {
+  console.log(' ')
+  console.log('filesUpdated')
 
   // tree.onModuleInvalidated('/a.js', () => { console.log('INVALIDATED a') })
   // tree.onModuleInvalidated('/b.tsx', () => { console.log('INVALIDATED b') })
@@ -22,8 +24,8 @@ tree.watch().on('filesUpdated', () => {
   import('./site/a.js')
 })
 
-tree.watch().on('filesUpdated', (changes) => { console.log('changes1', changes) })
-tree.watch().on('filesUpdated', (changes) => { console.log('changes2', changes) })
+// tree.watch().on('filesUpdated', (changes) => { console.log('changes1', changes) })
+// tree.watch().on('filesUpdated', (changes) => { console.log('changes2', changes) })
 
 registerHooks(hooks.useTree(tree))
 
