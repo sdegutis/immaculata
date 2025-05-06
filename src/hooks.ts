@@ -4,9 +4,7 @@ import { relative } from "path/posix"
 import { fileURLToPath } from "url"
 import type { FileTree } from "./filetree.js"
 
-// Can't remove until
-// https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72651
-// is merged
+// Can't remove until https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72651 is merged
 declare module "module" {
   export function registerHooks(opts: {
     load?: (url: string, context: LoadHookContext, nextLoad: (url: string, context?: Partial<LoadHookContext>) => LoadFnOutput) => LoadFnOutput,
