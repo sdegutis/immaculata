@@ -33,52 +33,56 @@ export class FileTree {
     this.loadDir('/')
   }
 
-  private loadDir(base: string, changes?: FileTreeChange[]) {
+  private loadDir(base: string, meta?: { changes: FileTreeChange[], invalidated: Set<string> }) {
     const dirRealPath = this.realPathFor(base)
     const files = fs.readdirSync(dirRealPath)
     for (const name of files) {
       const normalizedPath = posix.join(base, name)
       const realFilePath = posix.join(dirRealPath, name)
       const stat = fs.statSync(realFilePath)
-      this.maybeAdd(normalizedPath, stat, changes)
+      this.maybeAdd(normalizedPath, stat, meta)
     }
   }
 
-  private maybeAdd(path: string, stat: fs.Stats, changes?: FileTreeChange[]) {
+  private maybeAdd(path: string, stat: fs.Stats, meta?: { changes: FileTreeChange[], invalidated: Set<string> }) {
     if (stat.isDirectory()) {
       if (this.exclude?.(path + '/', stat)) return
-      this.loadDir(path, changes)
+      this.loadDir(path, meta)
     }
     else if (stat.isFile()) {
       if (this.exclude?.(path, stat)) return
-      this.createFile(path, changes)
+      this.createFile(path, meta)
     }
   }
 
-  private createFile(path: string, changes?: FileTreeChange[]) {
+  private createFile(path: string, meta?: { changes: FileTreeChange[], invalidated: Set<string> }) {
     const content = fs.readFileSync(this.realPathFor(path))
     const existing = this.files.get(path)
     if (existing) {
       if (content.equals(existing.content)) {
         return
       }
-      changes?.push({ path, change: 'dif' })
+      meta?.changes.push({ path, change: 'dif' })
     }
     else {
-      changes?.push({ path, change: 'add' })
+      meta?.changes.push({ path, change: 'add' })
     }
 
+    this.invalidateModule(path, meta?.invalidated)
+
     const version = Date.now()
-    this.invalidateModule(path)
     const requiredBy = (by: string) => this.addDependency(by, path)
     this.files.set(path, { path, content, version, requiredBy })
   }
 
   private moduleInvalidated = new EventEmitter()
 
-  private invalidateModule(path: string) {
+  private invalidateModule(path: string, invalidated?: Set<string>) {
     // No way to delete it from module cache yet
     // See https://github.com/nodejs/node/issues/57696
+
+    if (invalidated?.has(path)) return
+    invalidated?.add(path)
 
     this.fsevents?.emit('moduleInvalidated', path)
     this.moduleInvalidated.emit(path)
@@ -106,13 +110,14 @@ export class FileTree {
 
   private pathsUpdated(...paths: string[]) {
     const changes: FileTreeChange[] = []
+    const invalidated = new Set<string>()
 
     for (const filepath of paths) {
       const realPath = this.realPathFor(filepath)
       const stat = fs.existsSync(realPath) ? fs.statSync(realPath) : undefined
 
       if (stat) {
-        this.maybeAdd(filepath, stat, changes)
+        this.maybeAdd(filepath, stat, { changes, invalidated })
       }
       else {
         if (this.files.delete(filepath)) {
@@ -129,13 +134,13 @@ export class FileTree {
 
     const resetSeen = new Set<string>()
     for (const change of changes) {
-      this.resetDepTree(change.path, resetSeen)
+      this.resetDepTree(change.path, resetSeen, invalidated)
     }
 
     return changes
   }
 
-  private resetDepTree(path: string, seen: Set<string>) {
+  private resetDepTree(path: string, seen: Set<string>, invalidated: Set<string>) {
     if (seen.has(path)) return
     seen.add(path)
 
@@ -145,8 +150,8 @@ export class FileTree {
         for (const dep of requiredBy) {
           const file = this.files.get(dep)!
           file.version = Date.now()
-          this.invalidateModule(dep)
-          this.resetDepTree(dep, seen)
+          this.invalidateModule(dep, invalidated)
+          this.resetDepTree(dep, seen, invalidated)
         }
       }
     }
