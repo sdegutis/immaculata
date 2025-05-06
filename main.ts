@@ -11,7 +11,8 @@ tree.watch().on('moduleInvalidated', path => {
   console.log('moduleInvalidated', path)
 })
 
-tree.watch().on('filesUpdated', () => {
+tree.watch().on('filesUpdated', (changes) => {
+  console.log('filesUpdated', ...changes)
   import('./site/a.js')
 })
 

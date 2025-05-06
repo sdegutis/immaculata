@@ -7,5 +7,5 @@ console.log('in a', a, b, inc)
 
 
 tree.onModuleInvalidated(import.meta.url, () => {
-  // console.log('INVALIDATED a')
+  console.log('INVALIDATED a')
 })
