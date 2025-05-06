@@ -1,6 +1,6 @@
 import { tree } from "../tree.ts"
 
-export const str4 = 'hi234!'
+export const str4 = 'jsx:'
 
 tree.onModuleInvalidated(import.meta.url, () => {
   console.log('INVALIDATED rimpl')
