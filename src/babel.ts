@@ -1,11 +1,6 @@
-import type { declare } from '@babel/helper-plugin-utils'
 import type { Visitor } from '@babel/traverse'
 import { readFileSync } from "node:fs"
 import { join } from 'node:path'
-
-export default ((api, opts: { replacements?: Record<string, string> }, dirname) => {
-  return transformImportsPlugin(dirname, opts.replacements)
-}) as Parameters<typeof declare>[0]
 
 export function transformImportsPlugin(projectRoot: string, replacements?: Record<string, string>) {
   return {

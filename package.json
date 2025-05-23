@@ -25,7 +25,6 @@
     "mime-types": "^3.0.1"
   },
   "devDependencies": {
-    "@types/babel__helper-plugin-utils": "^7.10.3",
     "@types/babel__traverse": "^7.20.7",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^22.15.9",
