@@ -35,9 +35,16 @@ function modifyPath(projectRoot: string, source: babel.types.StringLiteral, repl
     return
   }
 
-  const split = dep.indexOf('/')
+  let split = dep.indexOf('/')
+  if (split === -1) split = dep.length
+
   const lib = dep.slice(0, split)
   const imported = dep.slice(split)
+
+  if (replacements && lib in replacements) {
+    source.value = replacements[lib]! + imported
+    return
+  }
 
   const fullpath = join(projectRoot, 'node_modules', lib, 'package.json')
   const pkgjson = JSON.parse(readFileSync(fullpath, 'utf8'))
