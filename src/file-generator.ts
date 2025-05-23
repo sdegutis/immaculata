@@ -1,14 +1,14 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-export function generateFiles(out: Map<string, Buffer | string>, opts: {
-  parent: string,
+export function generateFiles(out: Map<string, Buffer | string>, opts?: {
+  parent?: string,
   dry?: boolean,
   dir?: string,
 }) {
   const dry = opts?.dry ?? false
   const outDir = opts?.dir ?? 'docs'
-  const parent = opts.parent.split(path.sep).join(path.posix.sep)
+  const parent = opts?.parent ?? ''
 
   const madeDirs = new Set<string>()
   const mkdirIfNeeded = (dir: string) => {
