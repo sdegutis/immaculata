@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@types/mime-types": "^2.1.4",
-    "@types/node": "^22.15.9",
+    "@types/node": "^22.15.21",
     "typescript": "^5.8.2"
   }
 }
