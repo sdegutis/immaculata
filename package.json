@@ -1,6 +1,6 @@
 {
   "name": "immaculata",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "exports": {
     ".": "./dist/index.js",
     "./*.js": "./dist/*.js"
@@ -14,7 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/sdegutis/immaculata.git"
   },
-  "keywords": [ ],
+  "keywords": [],
   "author": "@sdegutis",
   "description": "Simple TypeScript/JSX SSG",
   "bugs": {
