@@ -1,0 +1,40 @@
+import type { PluginItem } from '@babel/core'
+import { readFileSync } from "node:fs"
+
+export function transformImportsPlugin(replacements?: Record<string, string>) {
+  return {
+    visitor: {
+      ImportDeclaration: {
+        enter(path) {
+          modifyPath(path.node.source, replacements)
+        },
+      },
+      ExportDeclaration: {
+        enter(path) {
+          if ('source' in path.node && path.node.source?.value) {
+            modifyPath(path.node.source, replacements)
+          }
+        }
+      },
+    }
+  } as PluginItem
+}
+
+function modifyPath(source: babel.types.StringLiteral, replacements?: Record<string, string>) {
+  const dep = source.value
+  if (dep.match(/^[./]/) || dep.startsWith('http')) return
+
+  if (replacements && dep in replacements) {
+    source.value = replacements[dep]!
+    return
+  }
+
+  const split = dep.indexOf('/')
+  const lib = dep.slice(0, split)
+  const imported = dep.slice(split)
+
+  const pkgjson = JSON.parse(readFileSync('node_modules/' + lib + '/package.json', 'utf8'))
+  const baseurl = new URL(imported, pkgjson.homepage)
+
+  source.value = baseurl.href
+}
