@@ -34,15 +34,13 @@ export class DevServer {
       let url = req.url!.split('?')[0]!
 
       if (opts?.prefix) {
-        const prefix = opts.prefix
-
-        if (!url.startsWith(prefix)) {
+        if (!url.startsWith(opts.prefix)) {
           res.statusCode = 404
-          res.end(`Error: Routes must begin with "${prefix}"`)
+          res.end(`Error: Routes must begin with "${opts.prefix}"`)
           return
         }
 
-        url = url.slice(prefix.length)
+        url = url.slice(opts.prefix.length)
       }
 
       if (url === hmrPath) {
