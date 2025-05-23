@@ -28,9 +28,9 @@ export class DevServer {
     }
 
     const server = http.createServer((req, res) => {
-      const url = req.url!.split('?')[0]!
-
       if (opts?.onRequest?.(res) === 'handled') return
+
+      const url = req.url!.split('?')[0]!
 
       if (url === hmrPath) {
         res.once('close', () => {
