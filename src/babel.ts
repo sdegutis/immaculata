@@ -1,4 +1,4 @@
-import type { Visitor } from '@babel/traverse'
+import type { PluginItem } from '@babel/core'
 import { readFileSync } from "node:fs"
 import { join } from 'node:path'
 
@@ -17,8 +17,8 @@ export function transformImportsPlugin(projectRoot: string, replacements?: Recor
           }
         }
       },
-    } as Visitor
-  }
+    }
+  } as PluginItem
 }
 
 function modifyPath(projectRoot: string, source: babel.types.StringLiteral, replacements?: Record<string, string>) {
