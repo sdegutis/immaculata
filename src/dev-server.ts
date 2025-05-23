@@ -14,6 +14,7 @@ export class DevServer {
 
   public constructor(port: number, opts?: {
     hmrPath?: string,
+    prefix?: string,
     onRequest?: (res: http.ServerResponse) => 'handled' | void,
   }) {
     const hmrPath = opts?.hmrPath
@@ -30,7 +31,19 @@ export class DevServer {
     const server = http.createServer((req, res) => {
       if (opts?.onRequest?.(res) === 'handled') return
 
-      const url = req.url!.split('?')[0]!
+      let url = req.url!.split('?')[0]!
+
+      if (opts?.prefix) {
+        const prefix = opts.prefix
+
+        if (!url.startsWith(prefix)) {
+          res.statusCode = 404
+          res.end(`Error: Routes must begin with "${prefix}"`)
+          return
+        }
+
+        url = url.slice(prefix.length)
+      }
 
       if (url === hmrPath) {
         res.once('close', () => {
