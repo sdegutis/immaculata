@@ -15,9 +15,6 @@ export type FileTreeChange = { path: string, change: 'add' | 'dif' | 'rem' }
 
 export class FileTree {
 
-  /** The exact argument passed to constructor */
-  public path: string
-
   /** The full file URL. Never ends with `'/'` */
   public root: string
   private exclude?: ShouldExcludeFile | undefined
@@ -27,8 +24,7 @@ export class FileTree {
   public constructor(path: string, importMetaUrl: string, opts?: {
     exclude?: ShouldExcludeFile,
   }) {
-    this.path = path
-    this.root = new URL(this.path, importMetaUrl).href.replace(/\/+$/, '')
+    this.root = new URL(path, importMetaUrl).href.replace(/\/+$/, '')
     this.exclude = opts?.exclude
     this.loadDir('/')
   }
