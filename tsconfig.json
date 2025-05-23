@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "NodeNext",
+    "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true,
     "importsNotUsedAsValues": "remove",
     "declaration": true,
