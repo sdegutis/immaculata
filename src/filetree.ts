@@ -1,7 +1,7 @@
 import { EventEmitter } from "events"
 import * as fs from "fs"
 import * as posix from "path/posix"
-import { fileURLToPath } from "url"
+import { fileURLToPath, pathToFileURL } from "url"
 
 export type TreeFile = {
   path: string,
@@ -21,10 +21,11 @@ export class FileTree {
 
   public files = new Map<string, TreeFile>();
 
-  public constructor(path: string, importMetaUrl: string, opts?: {
+  public constructor(path: string, parentDir: string, opts?: {
     exclude?: ShouldExcludeFile,
   }) {
-    this.root = new URL(path, importMetaUrl).href.replace(/\/+$/, '')
+    const filePath = posix.join(parentDir, path)
+    this.root = pathToFileURL(filePath).href.replace(/\/+$/, '')
     this.exclude = opts?.exclude
     this.loadDir('/')
   }
