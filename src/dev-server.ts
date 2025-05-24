@@ -88,7 +88,7 @@ export class DevServer {
     })
 
     server.on('listening', () => {
-      console.log(`Running on http://localhost:${port}`)
+      console.log(`Running on http://localhost:${port}${prefix ?? ''}/`)
     })
   }
 
