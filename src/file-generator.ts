@@ -14,7 +14,7 @@ export function generateFiles(out: Map<string, Buffer | string>, opts?: {
   const mkdirIfNeeded = (dir: string) => {
     if (madeDirs.has(dir)) return
     madeDirs.add(dir)
-    console.log('mkdir', dir)
+    console.log('mkdir    ', dir)
     if (!dry) fs.mkdirSync(dir)
   }
 
