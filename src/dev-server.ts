@@ -18,6 +18,7 @@ export class DevServer {
     onRequest?: (res: http.ServerResponse) => 'handled' | void,
   }) {
     const hmrPath = opts?.hmrPath
+    const prefix = opts?.prefix?.replace(/\/+$/, '')
 
     if (hmrPath) {
       this.events.on('reload', (data) => {
@@ -33,14 +34,14 @@ export class DevServer {
 
       let url = req.url!.split('?')[0]!
 
-      if (opts?.prefix) {
-        if (!url.startsWith(opts.prefix)) {
+      if (prefix) {
+        if (!url.startsWith(prefix)) {
           res.statusCode = 404
-          res.end(`Error: Routes must begin with "${opts.prefix}"`)
+          res.end(`Error: Routes must begin with "${prefix}"`)
           return
         }
 
-        url = url.slice(opts.prefix.length)
+        url = url.slice(prefix.length)
       }
 
       if (url === hmrPath) {
