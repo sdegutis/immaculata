@@ -1,6 +1,6 @@
 {
   "name": "immaculata",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "exports": {
     ".": "./dist/index.js",
     "./*.js": "./dist/*.js"
