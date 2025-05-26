@@ -60,14 +60,16 @@ declare global {
       | undefined
       | jsxChildren[]
 
-    type jsxify<T extends HTMLElement> = {
-      [A in keyof T as A extends string ? Lowercase<Exclude<A, 'children'>> : never]?: (
-        | string
-        | boolean
-        | (T[A] extends (string | boolean | null | number)
-          ? T[A]
-          : never))
-    } & { children?: any, class?: string }
+    type jsxAllowedAttrValues = (string | boolean | null | number)
+
+    type jsxAllowedAttr<T, A extends keyof T & string> =
+      A extends 'children' ? never :
+      T[A] extends jsxAllowedAttrValues ? Lowercase<A> :
+      never
+
+    type jsxify<T> =
+      & { [A in keyof T & string as jsxAllowedAttr<T, A>]?: T[A] }
+      & { children?: any, class?: string }
 
 
     interface ElementChildrenAttribute { children: {} }
