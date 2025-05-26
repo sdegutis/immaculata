@@ -60,7 +60,9 @@ declare global {
       | undefined
       | jsxChildren[]
 
-    type ElementChildrenAttribute = { children: jsxChildren }
+    interface ElementChildrenAttribute {
+      children: {}
+    }
 
     type Element = string
 
