@@ -70,9 +70,7 @@ declare global {
     } & { children?: any, class?: string }
 
 
-    interface ElementChildrenAttribute {
-      children: {}
-    }
+    interface ElementChildrenAttribute { children: {} }
 
     type Element = string
 
