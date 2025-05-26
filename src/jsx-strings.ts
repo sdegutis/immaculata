@@ -60,6 +60,16 @@ declare global {
       | undefined
       | jsxChildren[]
 
+    type jsxify<T extends HTMLElement> = {
+      [A in keyof T as A extends string ? Lowercase<Exclude<A, 'children'>> : never]?: (
+        | string
+        | boolean
+        | (T[A] extends (string | boolean | null | number)
+          ? T[A]
+          : never))
+    } & { children?: any, class?: string }
+
+
     interface ElementChildrenAttribute {
       children: {}
     }
@@ -69,15 +79,6 @@ declare global {
     type ElementType =
       | string
       | ((data: any) => jsxChildren)
-
-    type jsxify<T extends HTMLElement> = {
-      [A in keyof T as A extends string ? Lowercase<Exclude<A, 'children'>> : never]?: (
-        | string
-        | boolean
-        | (T[A] extends (string | boolean | null | number)
-          ? T[A]
-          : never))
-    } & { children?: any, class?: string }
 
     type HtmlElements = {
       [K in keyof HTMLElementTagNameMap]: jsxify<HTMLElementTagNameMap[K]>
