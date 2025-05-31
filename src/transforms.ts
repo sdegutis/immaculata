@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs"
 import { join } from 'node:path'
 import ts from 'typescript'
 
-export function transformImports(projectRoot: string, replacements?: Record<string, string>): ts.TransformerFactory<ts.SourceFile> {
+export function transformExternalModuleNames(projectRoot: string, replacements?: Record<string, string>): ts.TransformerFactory<ts.SourceFile> {
   return ctx => node => {
     return ts.visitNode(node, visitor) as ts.SourceFile
     function visitor(node: ts.Node) {
