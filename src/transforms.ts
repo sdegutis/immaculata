@@ -11,18 +11,20 @@ export function transformImports(projectRoot: string, replacements?: Record<stri
         ts.isExportDeclaration(node.parent) ||
         (ts.isCallExpression(node.parent) && node.parent.expression.getText() === 'import')
       )) {
-        return ts.factory.createStringLiteral(modifyPath(projectRoot, node.text, replacements))
+        return maybeReplace(node, projectRoot, replacements)
       }
       return ts.visitEachChild(node, visitor, ctx)
     }
   }
 }
 
-function modifyPath(projectRoot: string, dep: string, replacements?: Record<string, string>): string {
-  if (dep.match(/^[./]/) || dep.startsWith('http')) return dep
+function maybeReplace(node: ts.StringLiteral, projectRoot: string, replacements?: Record<string, string>): ts.StringLiteral {
+  const dep = node.text
+
+  if (dep.match(/^[./]/) || dep.startsWith('http')) return node
 
   if (replacements && dep in replacements) {
-    return replacements[dep]!
+    return ts.factory.createStringLiteral(replacements[dep]!)
   }
 
   let split = dep.indexOf('/')
@@ -32,12 +34,12 @@ function modifyPath(projectRoot: string, dep: string, replacements?: Record<stri
   const imported = dep.slice(split)
 
   if (replacements && lib in replacements) {
-    return replacements[lib]! + imported
+    return ts.factory.createStringLiteral(replacements[lib]! + imported)
   }
 
   const fullpath = join(projectRoot, 'node_modules', lib, 'package.json')
   const pkgjson = JSON.parse(readFileSync(fullpath, 'utf8'))
   const baseurl = new URL(imported, pkgjson.homepage)
 
-  return baseurl.href
+  return ts.factory.createStringLiteral(baseurl.href)
 }
