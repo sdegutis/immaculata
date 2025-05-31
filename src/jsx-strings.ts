@@ -69,7 +69,7 @@ declare global {
 
     type jsxify<T> =
       & { [A in keyof T & string as jsxAllowedAttr<T, A>]?: T[A] }
-      & { children?: any, class?: string }
+      & { children?: any, class?: string, style?: string }
 
 
     interface ElementChildrenAttribute { children: {} }
