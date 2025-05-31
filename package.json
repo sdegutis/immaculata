@@ -22,7 +22,6 @@
   },
   "homepage": "https://immaculata.dev",
   "dependencies": {
-    "@types/babel__core": "^7.20.5",
     "mime-types": "^3.0.1"
   },
   "devDependencies": {
