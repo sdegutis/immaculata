@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs"
-import { findPackageJSON } from "node:module"
 import ts from 'typescript'
 
 export function transformExternalModuleNames(replacements?: Record<string, string>): ts.TransformerFactory<ts.SourceFile> {
@@ -37,9 +35,11 @@ function maybeReplace(node: ts.StringLiteral, replacements?: Record<string, stri
     return ts.factory.createStringLiteral(replacements[lib]! + imported)
   }
 
-  const fullpath = findPackageJSON('ref.api.90s.dev', import.meta.filename)!
-  const pkgjson = JSON.parse(readFileSync(fullpath, 'utf8'))
-  const baseurl = new URL(imported, pkgjson.homepage)
+  return node
 
-  return ts.factory.createStringLiteral(baseurl.href)
+  // const fullpath = findPackageJSON('ref.api.90s.dev', import.meta.filename)!
+  // const pkgjson = JSON.parse(readFileSync(fullpath, 'utf8'))
+  // const baseurl = new URL(imported, pkgjson.homepage)
+
+  // return ts.factory.createStringLiteral(baseurl.href)
 }
