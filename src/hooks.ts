@@ -1,18 +1,8 @@
 import { readFileSync } from "fs"
-import type { registerHooks } from "module"
+import type { registerHooks, RegisterHooksOptions } from "module"
 import { relative } from "path/posix"
 import { fileURLToPath } from "url"
 import type { FileTree } from "./filetree.js"
-
-// Can't remove until https://github.com/DefinitelyTyped/DefinitelyTyped/pull/72651 is merged
-declare module "module" {
-  export function registerHooks(opts: {
-    load?: (url: string, context: LoadHookContext, nextLoad: (url: string, context?: Partial<LoadHookContext>) => LoadFnOutput) => LoadFnOutput,
-    resolve?: (specifier: string, context: ResolveHookContext, nextResolve: (specifier: string, context?: Partial<ResolveHookContext>) => ResolveFnOutput) => ResolveFnOutput,
-  }): void
-}
-
-type ModuleHook = Parameters<typeof registerHooks>[0]
 
 function extRegex(ext: string) {
   const re = new RegExp(`\\.${ext}(\\?|$)`)
@@ -23,7 +13,7 @@ type StringExportOptions =
   | { bareExt: string }
   | { should: (url: string) => boolean }
 
-export function exportAsString(opts: StringExportOptions): ModuleHook {
+export function exportAsString(opts: StringExportOptions): RegisterHooksOptions {
   const should = 'should' in opts ? opts.should : extRegex(opts.bareExt)
   return {
     load(url, context, nextLoad) {
@@ -37,7 +27,7 @@ export function exportAsString(opts: StringExportOptions): ModuleHook {
   }
 }
 
-export const tryAltExts: ModuleHook = {
+export const tryAltExts: RegisterHooksOptions = {
 
   resolve: (spec, ctx, next) => {
 
@@ -61,7 +51,7 @@ export const tryAltExts: ModuleHook = {
 
 }
 
-export function compileJsx(fn: (src: string, url: string) => string): ModuleHook {
+export function compileJsx(fn: (src: string, url: string) => string): RegisterHooksOptions {
   return {
 
     load: (url, context, next) => {
@@ -86,7 +76,7 @@ export function compileJsx(fn: (src: string, url: string) => string): ModuleHook
   }
 }
 
-export function mapImport(from: string, to: string): ModuleHook {
+export function mapImport(from: string, to: string): RegisterHooksOptions {
   return {
     resolve: (spec, ctx, next) => {
       if (spec === from) spec = to
