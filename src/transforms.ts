@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs"
-import { join } from 'node:path'
+import { findPackageJSON } from "node:module"
 import ts from 'typescript'
 
-export function transformExternalModuleNames(projectRoot: string, replacements?: Record<string, string>): ts.TransformerFactory<ts.SourceFile> {
+export function transformExternalModuleNames(replacements?: Record<string, string>): ts.TransformerFactory<ts.SourceFile> {
   return ctx => node => {
     return ts.visitNode(node, visitor) as ts.SourceFile
     function visitor(node: ts.Node) {
@@ -11,14 +11,14 @@ export function transformExternalModuleNames(projectRoot: string, replacements?:
         ts.isExportDeclaration(node.parent) ||
         (ts.isCallExpression(node.parent) && node.parent.expression.getText() === 'import')
       )) {
-        return maybeReplace(node, projectRoot, replacements)
+        return maybeReplace(node, replacements)
       }
       return ts.visitEachChild(node, visitor, ctx)
     }
   }
 }
 
-function maybeReplace(node: ts.StringLiteral, projectRoot: string, replacements?: Record<string, string>): ts.StringLiteral {
+function maybeReplace(node: ts.StringLiteral, replacements?: Record<string, string>): ts.StringLiteral {
   const dep = node.text
 
   if (dep.match(/^[./]/) || dep.startsWith('http')) return node
@@ -37,7 +37,7 @@ function maybeReplace(node: ts.StringLiteral, projectRoot: string, replacements?
     return ts.factory.createStringLiteral(replacements[lib]! + imported)
   }
 
-  const fullpath = join(projectRoot, 'node_modules', lib, 'package.json')
+  const fullpath = findPackageJSON('ref.api.90s.dev', import.meta.filename)!
   const pkgjson = JSON.parse(readFileSync(fullpath, 'utf8'))
   const baseurl = new URL(imported, pkgjson.homepage)
 
