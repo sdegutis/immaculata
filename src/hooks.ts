@@ -89,13 +89,15 @@ export function useTree(tree: FileTree): Parameters<typeof registerHooks>[0] {
   return {
 
     resolve: (spec, context, next) => {
-      if (!spec.match(/^(\.|\/|file:\/\/\/)/)) return next(spec, context)
+      const got = next(spec, context)
 
-      let path = new URL(spec, context.parentURL).href
-      if (!path.startsWith(tree.root)) return next(spec, context)
+      if (!spec.match(/^(\.|\/|file:\/\/\/)/)) return got
+
+      let path = got.url
+      if (!path.startsWith(tree.root)) return got
 
       const found = tree.files.get('/' + relative(tree.root, path))
-      if (!found) return next(spec, context)
+      if (!found) return got
 
       if (context.parentURL?.startsWith(tree.root) && !context.parentURL.endsWith('/noop.js')) {
         const depending = context.parentURL.slice(tree.root.length)
