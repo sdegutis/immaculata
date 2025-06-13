@@ -19,7 +19,7 @@ import { registerHooks } from 'module'
 const tree = new FileTree('src', import.meta.dirname)
 
 // invalidate modules under "src" when they change
-registerHooks(hooks.useTree(tree))
+registerHooks(tree.moduleHooks())
 
 // keep it up to date
 tree.watch().on('filesUpdated', doStuff)
