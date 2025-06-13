@@ -15,7 +15,7 @@
     "url": "git+https://github.com/sdegutis/immaculata.git"
   },
   "keywords": [],
-  "author": "@sdegutis",
+  "author": "Steven Degutis",
   "description": "Simple TypeScript/JSX SSG",
   "bugs": {
     "url": "https://github.com/sdegutis/immaculata/issues"
