@@ -1,8 +1,6 @@
 import { readFileSync } from "fs"
 import type { RegisterHooksOptions } from "module"
-import { relative } from "path/posix"
 import { fileURLToPath } from "url"
-import type { FileTree } from "./filetree.js"
 
 function extRegex(ext: string) {
   const re = new RegExp(`\\.${ext}(\\?|$)`)
@@ -82,50 +80,5 @@ export function mapImport(from: string, to: string): RegisterHooksOptions {
       if (spec === from) spec = to
       return next(spec, ctx)
     }
-  }
-}
-
-export function useTree(tree: FileTree): RegisterHooksOptions {
-  return {
-
-    resolve: (spec, context, next) => {
-      const got = next(spec, context)
-
-      if (!spec.match(/^(\.|\/|file:\/\/\/)/)) return got
-
-      let path = got.url
-      if (!path.startsWith(tree.root)) return got
-
-      const found = tree.files.get('/' + relative(tree.root, path))
-      if (!found) return got
-
-      if (context.parentURL?.startsWith(tree.root) && !context.parentURL.endsWith('/noop.js')) {
-        const depending = context.parentURL.slice(tree.root.length)
-        const depended = path.slice(tree.root.length)
-        tree.addDependency(depending, depended)
-      }
-
-      const newurl = new URL('.' + found.path, tree.root + '/')
-      newurl.search = `ver=${found.version}`
-
-      return { url: newurl.href, shortCircuit: true }
-    },
-
-    load: (url, context, next) => {
-      if (url.startsWith(tree.root)) {
-        url = url.replace(/\?ver=\d+$/, '')
-
-        const found = tree.files.get(url.slice(tree.root.length))
-        if (!found) return next(url, context)
-
-        return {
-          shortCircuit: true,
-          format: found.path.match(/\.tsx?(\?|$)/) ? 'module-typescript' : 'module',
-          source: found.content,
-        }
-      }
-      return next(url, context)
-    }
-
   }
 }
