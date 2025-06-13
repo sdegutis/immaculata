@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-export function generateFiles(out: Map<string, Buffer | string>, opts?: {
+export function generateFiles(out: Map<string, { content: Buffer | string }>, opts?: {
   parent?: string,
   dry?: boolean,
   dir?: string,
@@ -18,7 +18,7 @@ export function generateFiles(out: Map<string, Buffer | string>, opts?: {
     if (!dry) fs.mkdirSync(dir)
   }
 
-  for (const [filepath, content] of out) {
+  for (const [filepath, { content }] of out) {
     const relfile = path.join(outDir, filepath)
     const parts = relfile.split(path.sep)
     for (let i = 1; i < parts.length; i++) {

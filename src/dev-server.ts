@@ -5,7 +5,7 @@ import * as path from 'path'
 
 export class DevServer {
 
-  public files: Map<string, Buffer | string> | undefined
+  public files: Map<string, { content: Buffer | string }> | undefined
   public notFound?: (path: string) => string
 
   public reload = (data?: any) => this.events.emit('reload', data ?? {})
@@ -93,8 +93,8 @@ export class DevServer {
   }
 
   private getFile(url: string) {
-    const content = this.files?.get(url)
-    return content ? { url, blob: content } : undefined
+    const found = this.files?.get(url)
+    return found ? { url, blob: found.content } : undefined
   }
 
 }
