@@ -3,15 +3,10 @@
 *Node.js developer conveniences geared towards web dev*
 
 * Use [Module reloading (HMR) hooks](#module-hmr-in-nodejs) in Node.js's native module system
-
 * Use [JSX module transpilation hooks](#native-jsx-in-nodejs) in Node.js's native module system
-
 * Use [FileTree](src/filetree.ts) to load a file tree from disk into memory
-
 * Use [DevServer](src/dev-server.ts) to serve an in-memory file tree
-
 * Use [generateFiles](src/file-generator.ts) to write an in-memory file tree to disk
-
 * Use [Pipeline](src/pipeline.ts) to conveniently transform an in-memory file tree
 
 # Module HMR in Node.js
