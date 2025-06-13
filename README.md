@@ -18,10 +18,12 @@ import { registerHooks } from 'module'
 // keep an in-memory version of file tree under "./src"
 const tree = new FileTree('src', import.meta.dirname)
 
-// invalidate modules under "src" when they change
+// load modules under "src" from memory
+// and add query string to load latest version
 registerHooks(tree.moduleHooks())
 
-// keep it up to date
+// keep tree up to date
+// and re-import main module when any file changes
 tree.watch().on('filesUpdated', doStuff)
 doStuff()
 
