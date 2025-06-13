@@ -1,5 +1,5 @@
 import { readFileSync } from "fs"
-import type { registerHooks, RegisterHooksOptions } from "module"
+import type { RegisterHooksOptions } from "module"
 import { relative } from "path/posix"
 import { fileURLToPath } from "url"
 import type { FileTree } from "./filetree.js"
@@ -85,7 +85,7 @@ export function mapImport(from: string, to: string): RegisterHooksOptions {
   }
 }
 
-export function useTree(tree: FileTree): Parameters<typeof registerHooks>[0] {
+export function useTree(tree: FileTree): RegisterHooksOptions {
   return {
 
     resolve: (spec, context, next) => {
