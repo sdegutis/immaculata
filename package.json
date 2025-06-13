@@ -2,7 +2,6 @@
   "name": "immaculata",
   "version": "2.6.1",
   "exports": {
-    ".": "./dist/index.js",
     "./*.js": "./dist/*.js"
   },
   "scripts": {
