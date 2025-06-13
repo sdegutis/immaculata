@@ -2,29 +2,6 @@ import { readFileSync } from "fs"
 import type { RegisterHooksOptions } from "module"
 import { fileURLToPath } from "url"
 
-function extRegex(ext: string) {
-  const re = new RegExp(`\\.${ext}(\\?|$)`)
-  return (url: string) => url.match(re)
-}
-
-type StringExportOptions =
-  | { bareExt: string }
-  | { should: (url: string) => boolean }
-
-export function exportAsString(opts: StringExportOptions): RegisterHooksOptions {
-  const should = 'should' in opts ? opts.should : extRegex(opts.bareExt)
-  return {
-    load(url, context, nextLoad) {
-      const module = nextLoad(url, context)
-      if (should(url)) {
-        const src = JSON.stringify(module.source?.toString())
-        module.source = `export default ${src}`
-      }
-      return module
-    },
-  }
-}
-
 export const tryAltExts: RegisterHooksOptions = {
 
   resolve: (spec, ctx, next) => {
