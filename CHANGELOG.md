@@ -1,6 +1,6 @@
 # Change log
 
-## main
+## 2.7.0
 
 * Moved `useTree(tree)` module hook function to `tree.moduleHooks()` method
 * Removed undocumented and unuseful `exportAsString` module hook
