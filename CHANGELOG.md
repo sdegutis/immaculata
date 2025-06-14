@@ -4,8 +4,9 @@
 
 * Moved `useTree(tree)` module hook function to `tree.moduleHooks()` method
 * Removed undocumented and unuseful `exportAsString` module hook
-* Changed `DevServer.files` to match `FileTree.files`
-* Changed `generateFiles` file map to match `FileTree.files`
+* Changed `DevServer.files` map type to match `FileTree.files`
+* Changed `generateFiles(fileMap)` map type to match `FileTree.files`
+* Changed `Pipeline.results()` map type to match `FileTree.files`
 
 ## 2.6.1
 
