@@ -103,7 +103,7 @@ export class Pipeline {
   }
 
   results() {
-    return new Map(this.all().map(f => [f.path, f.textOrContent()]))
+    return new Map(this.all().map(f => [f.path, { content: f.textOrContent() }]))
   }
 
 }
