@@ -9,7 +9,9 @@
 * Use [generateFiles](src/file-generator.ts) to write an in-memory file tree to disk
 * Use [Pipeline](src/pipeline.ts) to conveniently transform an in-memory file tree
 
-# Module HMR in Node.js
+# Main features
+
+## Module HMR in Node.js
 
 ```ts
 import { FileTree, hooks } from 'immaculata'
@@ -34,7 +36,7 @@ async function doStuff() {
 }
 ```
 
-# Native JSX in Node.jS
+## Native JSX in Node.jS
 
 ```ts
 import { hooks } from 'immaculata'
@@ -48,4 +50,39 @@ registerHooks(hooks.mapImport('react/jsx-runtime', 'immaculata/jsx-strings.js'))
 
 // you can now import tsx files!
 const { template } = await import('./site/template.tsx')
+```
+
+# API
+
+See https://immaculata.dev/ for full docs until they're merged here.
+
+## DevServer
+
+```ts
+const server = new DevServer(8080)
+```
+
+```ts
+class DevServer {
+
+  // Creates a new http server and begins listening immediately at the given port.
+  // Optional fn `onRequest` can modify `res` or `res.req`.
+  // If `onRequest` closes the request, it must return handled.
+  constructor(port: number, opts?: {
+    hmrPath?: string,
+    prefix?: string,
+    onRequest?: (res: http.ServerResponse) => 'handled' | void,
+  })
+
+  // The files to serve. Has the same path format as `tree.files`.
+  files: Map<string, string|Buffer>
+
+  // Handler that returns 404 and the given content when the path isn't present in `server.files`.
+  notFound?: (path: string) => string
+
+  // Triggers SSE for listeners of `hmrPath`.
+  reload(): void
+
+}
+
 ```
